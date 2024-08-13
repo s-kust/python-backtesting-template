@@ -1,6 +1,26 @@
 # python-backtesting-template
 Trading strategy template that uses Python `backtesting` library. It lets you focus on improving your price forecasts and reduces the time and effort spent on auxiliary tasks.
 
+# Understanding the Benefits of This Repo
+
+This repository solves many problems that the original Python `backtesting` library does not solve.
+
+1. You can easily run backtests of your strategy for several (or several dozen) tickers simultaneously. The results of these backtests are combined and saved in the `output.xlsx` file. For details, explore files in the `strategy` folder.
+
+2. The `run_backtest_for_ticker` function returns not only `stats` and `trades` but also `last_day_result` dict. It allows you to send notifications if the trading signal is detected. For details, see the `utils/strategy_exec/last_day.py` file and `next` function.
+
+3. The system updates trailing stop-loss daily using the Average True Range (ATR) multiplied by 2.5. If a volatility outbreak (`tr_delta` high value) is detected, the stop loss is tightened. You can customize this behavior in `utils/strategy_exec/stop_loss.py` file.
+
+4. If it's possible to close half of the active position and make the remaining half risk-free, the system will do so. See the file `utils/strategy_exec/partial_close.py` for details. You can easily change or disable this behavior if you wish.
+
+5. In addition to partial closures, the system handles many other special situations. For details, see the `utils/strategy_exec/special_situations.py` file. You are encouraged to modify the list of special situations, change the order of their processing, and add your custom special situations.
+
+6. You can set the maximum duration for long and short trades. See the `process_max_duration` function for details.
+
+7. You can analyze trades in many different ways. The system adds tags to many trades that explain their fate. Each trade can contain several tags. For details, explore the `add_tag_to_trades_and_close_position` function code and where it is called. See also the functions `add_feature_to_trades` and `get_stat_and_trades_for_ticker`. 
+
+8. You can optimize different parameters of your strategy. See the variable `strategy_params`, its filling in `run_strategy_main.py` and its usage in the `get_desired_current_position_size` function. 
+
 # Quick Start
 
 The system currently uses [Alpha Vantage](https://www.alphavantage.co/) as its main source of OHLC data. If you want to change it, modify the `import_ohlc_daily` function. 
@@ -22,25 +42,7 @@ Note 1. The file `output.xlsx` is created only if the number of tickers is more 
 
 Note 2. If you wish, you can use several different forecasts at the same time, as well as additional features for filtering trades. In real life, you will most likely do so.
 
-Creating forecasts and rules for determining the desired position size are the steps where you create value.
-
-# Understanding the Benefits of This Repo
-
-This repository solves many problems that the original Python `backtesting` library does not solve.
-
-1. You can easily run backtests of your strategy for several (or several dozen) tickers simultaneously. The results of these backtests are combined and saved in the `output.xlsx` file. For details, explore files in the `strategy` folder.
-
-2. The `run_backtest_for_ticker` function returns not only `stats` and `trades` but also `last_day_result` dict. It allows you to send notifications if the trading signal is detected. For details, see the `utils/strategy_exec/last_day.py` file and `next` function.
-
-3. The system updates trailing stop-loss daily using the Average True Range (ATR) multiplied by 2.5. If a volatility outbreak (`tr_delta` high value) is detected, the stop loss is tightened. You can customize this behavior in `utils/strategy_exec/stop_loss.py` file.
-
-4. If it's possible to close half of the active position and make the remaining half risk-free, the system will do so. See the file `utils/strategy_exec/partial_close.py` for details. You can easily change or disable this behavior if you wish.
-
-5. In addition to partial closures, the system handles many other special situations. For details, see the `utils/strategy_exec/special_situations.py` file. You are encouraged to modify the list of special situations, change the order of their processing, and add your custom special situations.
-
-6. You can set the maximum duration for long and short trades. See the `process_max_duration` function for details.
-
-7. You can analyze trades in many different ways. See the functions `add_feature_to_trades` and `get_stat_and_trades_for_ticker`. The system adds tags to many trades that explain their fate. Each trade can contain not one, but several tags. For details, explore the `add_tag_to_trades_and_close_position` function code and where it is called.
+Invention of forecasts and rules for determining the desired position size are the steps where you create value.
 
 # Output.xlsx File Overview and Explanations
 
