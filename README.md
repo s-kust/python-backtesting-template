@@ -3,7 +3,7 @@ Trading strategy template that uses Python `backtesting` library. It lets you fo
 
 # Understanding the Benefits of This Repo
 
-This repository solves many problems that the original Python `backtesting` library does not solve.
+Just like with the original Python `backtesting` package, you can obtain and use `stats`, `trades`, and interactive charts in HTML files. In addition, this repository solves many problems that the `backtesting` library does not solve.
 
 1. You can easily run backtests of your strategy for several (or several dozen) tickers simultaneously. The results of these backtests are combined and saved in the `output.xlsx` file. For details, explore files in the `strategy` folder.
 
