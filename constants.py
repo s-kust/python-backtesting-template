@@ -1,22 +1,7 @@
-# import os
-
 LOCAL_FOLDER = "/tmp/"
-# ALL_FILENAMES_PREFIX = "sys_tr_"
-# DB_EXTENSION = ".sqlite"
-# MAIN_DB_NAME = "algo_trading" + DB_EXTENSION
-# TICKER_TABLE_PREFIX = "ticker_"
 
-# DATA_BUCKET_NAME = os.environ.get("s3_bucket_data", default="sys-trading")
 TICKERS_DATA_FILENAMES_PREFIX = "single_"
 DATA_FILES_EXTENSION = ".xlsx"
-
-# ALPHA_VANTAGE_API_KEY = os.environ.get("alpha_vantage_key")
-# DB_NAME_MAIN = ALL_FILENAMES_PREFIX + "db.sqlite"
-# TLT_SPY_THRESHOLD_LOWER = 5
-# TLT_SPY_THRESHOLD_HIGHER = 86
-# PERIOD_1 = 1
-
-# ohlc_df_columns = ["Open", "High", "Low", "Close", "Volume"]
 
 TRADE_ALREADY_HALF_CLOSED = "; partially_closed"
 CLOSED_VOLATILITY_SPIKE = "; closed_due to volatility spike"
@@ -27,7 +12,6 @@ CLOSED_MAX_DURATION = "; closed because max duration exceeded"
 SL_TRIGGERED = "; stop-loss triggered"
 TP_TRIGGERED = "; take profit triggered"
 SL_TIGHTENED = "; stop-loss tightened during volatility spike"
-# MTUM_PERIOD = 20
 
 # SS - special situation
 SS_NO_TODAY = "No special situation today"
