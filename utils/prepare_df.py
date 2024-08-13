@@ -68,28 +68,5 @@ def get_df_with_fwd_ret(ticker: str, num_days: int = 24) -> pd.DataFrame:
     return res
 
 
-def add_forecasts_and_fwd_ret(df: pd.DataFrame, num_days: int = 24) -> pd.DataFrame:
-    """
-    Add forecasts and forward returns (diff of Close values)
-    """
-    res = df.copy()
-    res = get_df_with_forecasts(df=res)
-    res[f"Close_fwd_{str(num_days)}"] = res["Close"].shift(-num_days)
-    res[f"ret_{str(num_days)}"] = (
-        (res[f"Close_fwd_{str(num_days)}"] - res["Close"]) / res["Close"]
-    ) * 100
-    res[f"ret_{str(num_days)}"] = round(res[f"ret_{str(num_days)}"], 2)
-    del res[f"Close_fwd_{str(num_days)}"]
-    return res
-
-
-def get_forecast_rc(df: pd.DataFrame) -> pd.Series:
-    return df["forecast_rc"]
-
-
-def get_forecast_momentum(df: pd.DataFrame) -> pd.Series:
-    return df["forecast_momentum"]
-
-
 def get_forecast_bb(df: pd.DataFrame) -> pd.Series:
     return df["forecast_bb"]
