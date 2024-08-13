@@ -1,5 +1,5 @@
 # python-backtesting-template
-Trading strategy template that uses the Python `backtesting` library. It allows you to focus on improving your price forecasts and reduces your time and effort spent on related tasks. 
+Trading strategy template that uses Python `backtesting` library. It lets you focus on improving your price forecasts and reduces the time and effort spent on auxiliary tasks.
 
 # Quick Start
 
@@ -15,6 +15,14 @@ Note 2. If you wish, you can use several different forecasts at the same time, a
 
 Coding forecasts and rules for determining the desired position size are the steps where you create value.
 
+# Understanding the Benefits of This Repo
+
+# Output.xlsx File Overview and Explanations
+
+Your `output.xlsx` file may look like the following:
+![Python backtesting output file](./img/output.PNG)
+
+If you are a trader, you probably understand the meaning of its rows. The only row that requires explanation is `SQN_modified`. 
 
 
 
