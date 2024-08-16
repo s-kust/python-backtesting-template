@@ -2,6 +2,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 from backtesting.backtesting import Strategy
+
 from constants import DPS_STUB
 from utils.strategy_exec.misc import get_current_position_size
 
@@ -42,16 +43,20 @@ def get_desired_current_position_size(
     last_trade = strategy.closed_trades[-1] if strategy.closed_trades else None
     current_pl = strategy.trades[-1].pl if strategy.trades else None
 
-    # NOTE momentum_threshold is a fake example of some parameter that you may want to optimize.
+    # NOTE param_1 and param_1 are fake examples
+    # of some parameters that you may want to optimize.
     # You can have from zero to a large number of such parameters.
+    # See also the file optimize_params.py
 
-    momentum_threshold = 0.06  # default value
+    # default values
+    param_1 = 1.3
+    param_2 = 2
+
     if strategy_params:
-        if (
-            "momentum_threshold" in strategy_params
-            and strategy_params["momentum_threshold"] is not None
-        ):
-            momentum_threshold = strategy_params["momentum_threshold"]
+        if "param_1" in strategy_params and strategy_params["param_1"] is not None:
+            param_1 = strategy_params["param_1"]
+        if "param_2" in strategy_params and strategy_params["param_2"] is not None:
+            param_2 = strategy_params["param_2"]
 
     # Below is a stub that you can substitute with your code.
     # If the current position size is not zero,
