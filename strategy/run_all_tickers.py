@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from constants import tickers_all
+from utils.prepare_df import add_features_forecasts_to_ohlc_v1
 from utils.strategy_exec import process_last_day_res
 
 from .get_stat_and_trades_for_ticker import get_stat_and_trades_for_ticker
@@ -35,14 +36,19 @@ def run_all_tickers(
         print("", file=sys.stderr)
         print(f"Running {ticker=}, {counter} of {total_len}...", file=sys.stderr)
         print("", file=sys.stderr)
-        # NOTE You can run get_stat_and_trades_for_ticker with some feature (feature_col_name=something) or without it
+
+        # NOTE You can run get_stat_and_trades_for_ticker
+        # with some feature (feature_col_name=something)
+        # or without it
+
         stat, trades_df, last_day_result = get_stat_and_trades_for_ticker(
             ticker=ticker,
+            add_features_forecasts_func=add_features_forecasts_to_ohlc_v1,
             max_trade_duration_long=max_trade_duration_long,
             max_trade_duration_short=max_trade_duration_short,
+            feature_col_name=None,
             strategy_params=strategy_params,
         )
-        # stat, trades_df, last_day_result = get_stat_and_trades_for_ticker(ticker=ticker, feature_col_name="ADX")
         process_last_day_res(last_day_res=last_day_result)
         stat = stat.drop(["_strategy", "_equity_curve", "_trades"])
         stat["Start"] = stat["Start"].date()

@@ -36,29 +36,25 @@ class TickersData:
         return self.tickers_data[ticker]
 
 
-def get_df_with_forecasts(df: pd.DataFrame) -> pd.DataFrame:
-    res = df.copy(deep=True)
-    rolling_period_tr = 100
-    internal_atr_period = 3
+def add_features_forecasts_to_ohlc_v1(df: pd.DataFrame) -> pd.DataFrame:
 
+    # NOTE 1. Customize this function to add forecasts and features
+    # that you want. You may have
+
+    # NOTE 2. You can have and support multiple similar functions
+    # with different sets of features and forecasts.
+    # The function you want to use now needs to be passed
+    # as add_features_forecasts_func parameter
+    # when calling the function get_stat_and_trades_for_ticker.
+
+    res = df.copy()
     res = add_bb_forecast(df=res, col_name="Close")
-
-    res = add_atr_col_to_df(df=res, n=internal_atr_period)
-    res["tr_avg"] = (
-        res["tr"]
-        .rolling(window=rolling_period_tr, min_periods=rolling_period_tr)
-        .mean()
-    )
-    # NOTE tr_delta is used in update_stop_losses()
-    res["tr_delta"] = res[f"atr_{internal_atr_period}"] / res["tr_avg"]
-    del res["tr_avg"]
-
     return res
 
 
 def get_df_with_fwd_ret(ticker: str, num_days: int = 24) -> pd.DataFrame:
     res = import_ohlc_daily(ticker=ticker)
-    res = get_df_with_forecasts(df=res)
+    res = add_features_forecasts_to_ohlc_v1(df=res)
     res[f"Close_fwd_{str(num_days)}"] = res["Close"].shift(-num_days)
     res[f"ret_{str(num_days)}"] = (
         (res[f"Close_fwd_{str(num_days)}"] - res["Close"]) / res["Close"]

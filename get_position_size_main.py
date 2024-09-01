@@ -21,8 +21,8 @@ def get_desired_current_position_size(
     Return desired_position_size None - means do nothing today.
     desired_position_size 0 - means close all active trades.
     desired_position_size must be float in [-1.0; 1.0].
-    desired_position_size -1.0 - means 100% short;
-    desired_position_size 1.0 - means 100% long.
+    desired_position_size -1.0 - 100% short;
+    desired_position_size 1.0 - 100% long.
     """
     # NOTE You are expected to work mostly on this function.
     current_position_size = (

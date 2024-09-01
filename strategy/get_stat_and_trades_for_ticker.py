@@ -1,16 +1,41 @@
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
-from utils.import_data import import_ohlc_daily
-from utils.prepare_df import get_df_with_forecasts
+from utils.import_data import add_atr_col_to_df, import_ohlc_daily
 
 from .run_backtest_for_ticker import run_backtest_for_ticker
 
 
+def _add_tr_delta_col_to_ohlc(ohlc_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add tr_delta column to OHLC data
+    """
+
+    # NOTE 1. This function is mandatory to call,
+    # because tr_delta is used in update_stop_losses()
+
+    # NOTE 2. tr_delta is a volatility spike indicator.
+    # It can be used when building features and forecasts.
+
+    res = ohlc_df.copy()
+    rolling_period_tr = 100
+    internal_atr_period = 3
+    res = add_atr_col_to_df(df=res, n=internal_atr_period)
+    res["tr_avg"] = (
+        res["tr"]
+        .rolling(window=rolling_period_tr, min_periods=rolling_period_tr)
+        .mean()
+    )
+    res["tr_delta"] = res[f"atr_{internal_atr_period}"] / res["tr_avg"]
+    del res["tr_avg"]
+    return res
+
+
 def get_stat_and_trades_for_ticker(
     ticker: str,
+    add_features_forecasts_func: Callable,
     max_trade_duration_long: Optional[int] = None,
     max_trade_duration_short: Optional[int] = None,
     feature_col_name: Optional[str] = None,
@@ -24,10 +49,11 @@ def get_stat_and_trades_for_ticker(
     """
 
     ticker_data = import_ohlc_daily(ticker=ticker)
+    ticker_data = _add_tr_delta_col_to_ohlc(ticker_data)
 
-    # NOTE customize get_df_with_forecasts function
+    # NOTE customize add_features_forecasts_func
     # to add forecasts and features that you want
-    ticker_data = get_df_with_forecasts(df=ticker_data)
+    ticker_data = add_features_forecasts_func(df=ticker_data)
 
     stat, trades, last_day_result = run_backtest_for_ticker(
         ticker=ticker,
