@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 
 from constants import tickers_all
+from features.shooting_star import check_shooting_star_candle
 from forecast.forecast_bb import add_bb_forecast
 
 from .import_data import add_atr_col_to_df, import_ohlc_daily
@@ -36,7 +37,7 @@ class TickersData:
         return self.tickers_data[ticker]
 
 
-def add_features_forecasts_to_ohlc_v1(df: pd.DataFrame) -> pd.DataFrame:
+def add_features_forecasts_to_ohlc_v1_demo(df: pd.DataFrame) -> pd.DataFrame:
 
     # NOTE 1. Customize this function to add forecasts and features
     # that you want. You may have
@@ -52,9 +53,15 @@ def add_features_forecasts_to_ohlc_v1(df: pd.DataFrame) -> pd.DataFrame:
     return res
 
 
+def add_features_forecasts_to_ohlc_v2_ss(df: pd.DataFrame) -> pd.DataFrame:
+    res = df.copy()
+
+    return res
+
+
 def get_df_with_fwd_ret(ticker: str, num_days: int = 24) -> pd.DataFrame:
     res = import_ohlc_daily(ticker=ticker)
-    res = add_features_forecasts_to_ohlc_v1(df=res)
+    res = add_features_forecasts_to_ohlc_v1_demo(df=res)
     res[f"Close_fwd_{str(num_days)}"] = res["Close"].shift(-num_days)
     res[f"ret_{str(num_days)}"] = (
         (res[f"Close_fwd_{str(num_days)}"] - res["Close"]) / res["Close"]
