@@ -84,6 +84,34 @@ def add_features_forecasts_to_ohlc_v2_ss(df: pd.DataFrame) -> pd.DataFrame:
     return res
 
 
+def _get_bb_cooling_label(row) -> str:
+    if (row["forecast_bb_yesterday"]) < -2.4 and (
+        row["forecast_bb_yesterday"] < row["forecast_bb"]
+    ):
+        return "LOW_TO_HIGHER"
+    if (row["forecast_bb_yesterday"]) > 2.4 and (
+        row["forecast_bb_yesterday"] > row["forecast_bb"]
+    ):
+        return "HIGH_TO_LOWER"
+    return "NOTHING_SPECIAL"
+
+
+def add_features_forecasts_to_ohlc_v3(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add discrete feature bb_cooling,
+    i. e. overbought or oversold conditions start improving.
+    """
+    res = df.copy()
+
+    # NOTE Currently this is mandatory to run backtests, don't remove
+    res = add_bb_forecast(df=res, col_name="Close")
+
+    res["forecast_bb_yesterday"] = res["forecast_bb"].shift(1)
+    res["bb_cooling"] = res.apply(_get_bb_cooling_label, axis=1)
+    del res["forecast_bb_yesterday"]
+    return res
+
+
 def get_df_with_fwd_ret(
     ohlc_df: pd.DataFrame,
     num_days: int = 24,

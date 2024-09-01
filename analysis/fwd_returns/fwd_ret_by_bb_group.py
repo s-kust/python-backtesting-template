@@ -22,15 +22,20 @@ logging.basicConfig(
     filemode="a",
 )
 
-if __name__ == "__main__":
-    load_dotenv()
+NUM_DAYS_FWD_RETURN = 4
 
-    NUM_DAYS_FWD_RETURN = 4
+
+def analyze_fwd_ret_by_bb_group():
+    """
+    Function analyzes the forward returns,
+    noted as the percentage difference in todays and forward Close prices,
+    depending on the distance of today's Close price to its mean value,
+    expressed in the number of standard deviations.
+    This distance is a continuous value. It is split into discrete groups,
+    and then for each group the mean value of the forward return
+    and the confidence interval are calculated.
+    """
     GROUP_COL_NAME = "bb_group"
-
-    # clear LOG_FILE every time
-    open(LOG_FILE, "w").close()
-
     tickers_data = TickersData()
     combined_ohlc_all = pd.DataFrame()
     tickers_total_count = len(tickers_all)
@@ -56,10 +61,24 @@ if __name__ == "__main__":
         get_label_for_group=get_group_label_forecast_bb,
     )
     combined_ohlc_all.to_excel("combined_ohlc_all.xlsx", index=False)
+    excel_file_name = f"fwd_ret_{NUM_DAYS_FWD_RETURN}_by_{GROUP_COL_NAME}.xlsx"
     analyze_values_by_group(
         df=combined_ohlc_all,
         group_col_name=GROUP_COL_NAME,
         values_col_name=f"ret_{NUM_DAYS_FWD_RETURN}",
         group_order_map=group_order_bb,
-        excel_file_name=f"fwd_ret_{NUM_DAYS_FWD_RETURN}_by_{GROUP_COL_NAME}.xlsx",
+        excel_file_name=excel_file_name,
     )
+    print(
+        f"analyze_fwd_ret_by_bb_group - complete! Now you may explore the results file {excel_file_name}",
+        file=sys.stderr,
+    )
+
+
+if __name__ == "__main__":
+    load_dotenv()
+
+    # clear LOG_FILE every time
+    open(LOG_FILE, "w").close()
+
+    analyze_fwd_ret_by_bb_group()

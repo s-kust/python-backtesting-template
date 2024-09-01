@@ -55,6 +55,7 @@ def analyze_values_by_group(
     groups_total_count = len(group_names)
     counter = 0
     for group_name in group_names:
+        counter = counter + 1
         print(
             f"analyze_values_by_group: running {group_name=}, {counter} of {groups_total_count}...",
             file=sys.stderr,
