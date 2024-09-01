@@ -1,4 +1,5 @@
 import sys
+from typing import Callable
 
 import pandas as pd
 
@@ -54,14 +55,49 @@ def add_features_forecasts_to_ohlc_v1_demo(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_features_forecasts_to_ohlc_v2_ss(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add discrete feature is_shooting_star
+    """
     res = df.copy()
 
+    # NOTE Currently this is mandatory to run backtests, don't remove
+    res = add_bb_forecast(df=res, col_name="Close")
+
+    res["Close_yesterday"] = res["Close"].shift(1)
+    res["Low_yesterday"] = res["Low"].shift(1)
+    res["High_yesterday"] = res["High"].shift(1)
+    res["is_shooting_star"] = res.apply(
+        lambda row: check_shooting_star_candle(
+            yesterday_close=row["Close_yesterday"],
+            yesterday_high=row["High_yesterday"],
+            yesterday_low=row["Low_yesterday"],
+            today_close=row["Close"],
+            today_high=row["High"],
+            today_low=row["Low"],
+            today_open=row["Open"],
+        ),
+        axis=1,
+    )
+    del res["Close_yesterday"]
+    del res["Low_yesterday"]
+    del res["High_yesterday"]
     return res
 
 
-def get_df_with_fwd_ret(ticker: str, num_days: int = 24) -> pd.DataFrame:
-    res = import_ohlc_daily(ticker=ticker)
-    res = add_features_forecasts_to_ohlc_v1_demo(df=res)
+def get_df_with_fwd_ret(
+    ohlc_df: pd.DataFrame,
+    num_days: int = 24,
+    add_features_forecasts_func: Callable = add_features_forecasts_to_ohlc_v1_demo,
+) -> pd.DataFrame:
+
+    """
+    This function is used if you want to analyze
+    forward Close-Close returns rather than trades.
+    1. Call add_features_forecasts_func.
+    2. Add new column containing forward Close-Close return - ret_{str(num_days)}.
+    """
+    res = ohlc_df.copy()
+    res = add_features_forecasts_func(df=res)
     res[f"Close_fwd_{str(num_days)}"] = res["Close"].shift(-num_days)
     res[f"ret_{str(num_days)}"] = (
         (res[f"Close_fwd_{str(num_days)}"] - res["Close"]) / res["Close"]

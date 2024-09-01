@@ -3,22 +3,22 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 
-bb_group_1 = "-inf_-28"
-bb_group_2 = "-28_-24"
-bb_group_3 = "-24_-20"
-bb_group_4 = "-20_-16"
-bb_group_5 = "-16_-12"
-bb_group_6 = "-12_-8"
-bb_group_7 = "-8_-4"
-bb_group_8 = "-4_0"
-bb_group_9 = "0_4"
-bb_group_10 = "4_8"
-bb_group_11 = "8_12"
-bb_group_12 = "12_16"
-bb_group_13 = "16_20"
-bb_group_14 = "20_24"
-bb_group_15 = "24_28"
-bb_group_16 = "28_inf"
+bb_group_1 = "-inf_-2.8"
+bb_group_2 = "-2.8_-2.4"
+bb_group_3 = "-2.4_-2.0"
+bb_group_4 = "-2.0_-1.6"
+bb_group_5 = "-1.6_-1.2"
+bb_group_6 = "-1.2_-0.8"
+bb_group_7 = "-0.8_-0.4"
+bb_group_8 = "-0.4_0.0"
+bb_group_9 = "0.0_0.4"
+bb_group_10 = "0.4_0.8"
+bb_group_11 = "0.8_1.2"
+bb_group_12 = "1.2_1.6"
+bb_group_13 = "1.6_2.0"
+bb_group_14 = "2.0_2.4"
+bb_group_15 = "2.4_2.8"
+bb_group_16 = "2.8_inf"
 
 
 def get_group_label_forecast_bb(val: Optional[float]) -> Union[str, float]:

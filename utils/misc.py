@@ -15,17 +15,22 @@ def add_z_score_col_to_df(
 
 def add_feature_group_col_to_df(
     df: pd.DataFrame,
-    grouping_col_name: str,
+    continuous_feature_col_name: str,
     new_col_name: str,
     get_label_for_group: Callable,
 ) -> pd.DataFrame:
     """
-    Input: DataFrame with some continuos feature in column grouping_col_name.
+    Break a continuous feature into discrete groups
+    in order to then conduct an analysis of these groups.
+    Input: DataFrame with some feature in column continuous_feature_col_name.
     For each feature value, its label is determined
     using the function get_label_for_group
     and saved in a new column new_col_name.
     """
-    # NOTE get_label_for_group example - see function get_group_label_forecast_bb
+
+    # NOTE get_label_for_group example - see functions
+    # get_group_label_forecast_bb and get_group_label_tr_delta
+
     res = df.copy()
-    res[new_col_name] = res[grouping_col_name].apply(get_label_for_group)
+    res[new_col_name] = res[continuous_feature_col_name].apply(get_label_for_group)
     return res

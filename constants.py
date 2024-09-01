@@ -55,6 +55,17 @@ tickers_all = [
     "XME",
     "TLT",
 ]
+tickers_precious = [
+    "GLD",
+    "SLV",
+    "GDX",
+]
+tickers_commodities = [
+    "USO",
+    "WEAT",
+    "SOYB",
+    "CORN",
+]
 
 LOG_FILE = "app_run.log"
 
@@ -63,3 +74,5 @@ ACTION_SELL = "Sell"
 ACTION_DO_NOTHING = "Do nothing"
 ACTION_CLOSE_POSITION = "Close position"
 ACTION_SHARE_COUNT_0 = "Shares count 0"
+
+BOOTSTRAP_CONFIDENCE_LEVEL = 0.95
