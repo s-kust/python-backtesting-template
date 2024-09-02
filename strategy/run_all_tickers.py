@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from constants import tickers_all
-from utils.prepare_df import add_features_forecasts_to_ohlc_v1_demo
+from utils.prepare_df import add_bb_forecast_to_ohlc
 from utils.strategy_exec import process_last_day_res
 
 from .get_stat_and_trades_for_ticker import get_stat_and_trades_for_ticker
@@ -43,7 +43,7 @@ def run_all_tickers(
 
         stat, trades_df, last_day_result = get_stat_and_trades_for_ticker(
             ticker=ticker,
-            add_features_forecasts_func=add_features_forecasts_to_ohlc_v1_demo,
+            add_features_forecasts_func=add_bb_forecast_to_ohlc,
             max_trade_duration_long=max_trade_duration_long,
             max_trade_duration_short=max_trade_duration_short,
             feature_col_name=None,

@@ -38,12 +38,9 @@ class TickersData:
         return self.tickers_data[ticker]
 
 
-def add_features_forecasts_to_ohlc_v1_demo(df: pd.DataFrame) -> pd.DataFrame:
+def add_bb_forecast_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
 
-    # NOTE 1. Customize this function to add forecasts and features
-    # that you want. You may have
-
-    # NOTE 2. You can have and support multiple similar functions
+    # NOTE. You can have and support multiple similar functions
     # with different sets of features and forecasts.
     # The function you want to use now needs to be passed
     # as add_features_forecasts_func parameter
@@ -54,7 +51,7 @@ def add_features_forecasts_to_ohlc_v1_demo(df: pd.DataFrame) -> pd.DataFrame:
     return res
 
 
-def add_features_forecasts_to_ohlc_v2_ss(df: pd.DataFrame) -> pd.DataFrame:
+def add_shooting_star_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add discrete feature is_shooting_star
     """
@@ -85,27 +82,32 @@ def add_features_forecasts_to_ohlc_v2_ss(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _get_bb_cooling_label(row) -> str:
+
+    # check if oversold conditions start improving
     if (row["forecast_bb_yesterday"]) < -2.4 and (
         row["forecast_bb_yesterday"] < row["forecast_bb"]
     ):
         return "LOW_TO_HIGHER"
+
+    # check if overbought conditions start improving
     if (row["forecast_bb_yesterday"]) > 2.4 and (
         row["forecast_bb_yesterday"] > row["forecast_bb"]
     ):
         return "HIGH_TO_LOWER"
+
+    # base case
     return "NOTHING_SPECIAL"
 
 
-def add_features_forecasts_to_ohlc_v3(df: pd.DataFrame) -> pd.DataFrame:
+def add_bb_cooling_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add discrete feature bb_cooling,
     i. e. overbought or oversold conditions start improving.
     """
     res = df.copy()
 
-    # NOTE Currently this is mandatory to run backtests, don't remove
+    # We need forecast_bb for this feature
     res = add_bb_forecast(df=res, col_name="Close")
-
     res["forecast_bb_yesterday"] = res["forecast_bb"].shift(1)
     res["bb_cooling"] = res.apply(_get_bb_cooling_label, axis=1)
     del res["forecast_bb_yesterday"]
@@ -115,7 +117,7 @@ def add_features_forecasts_to_ohlc_v3(df: pd.DataFrame) -> pd.DataFrame:
 def get_df_with_fwd_ret(
     ohlc_df: pd.DataFrame,
     num_days: int = 24,
-    add_features_forecasts_func: Callable = add_features_forecasts_to_ohlc_v1_demo,
+    add_features_forecasts_func: Callable = add_bb_forecast_to_ohlc,
 ) -> pd.DataFrame:
 
     """

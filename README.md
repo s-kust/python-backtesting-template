@@ -64,3 +64,25 @@ A script `optimize_params.py` can help you in finding the optimal parameter valu
 ![trading strategy parameters optimization results](./img/optimization_res.PNG)
 
 It's a good sign when the charts of backtest results depending on parameter values resemble Gaussian curves. Little deviations from the optimal parameter value should ​​only cause slight deterioration in backtest results. If the backtest results fluctuate wildly and chaotically, something went wrong.
+
+# Analyzing Close-Close Returns
+
+This repository could assist you in analyzing the likely direction of stock prices over the next few days. Some days, you can predict it with a fair amount of confidence based on today's value of some features. These features may be discrete or continuous. The script `run_analysis.py` demonstrates how to do it. It runs the functions that are in the `analysis/fwd_returns` folder.
+
+## Discrete Feature Example
+
+As a tutorial example of using a discrete feature, see `bb_cooling`. It is a rudimentary indicator suggesting that overbought or oversold conditions are beginning to stabilize. See details in the function `add_bb_cooling_to_ohlc`. It adds this feature as a column to the OHLC data.
+
+The `analyze_fwd_ret_by_bb_cooling` function performs the analysis and saves the results in an Excel file. The `run_analysis.py` script calls this function for stocks, precious metals, and commodities.
+
+![Analyzing commodities prices](./img/bb_cooling_cmd.PNG)
+
+Getting long commodities when oversold conditions stabilize (`LOW_TO_HIGHER` group) could be a promising strategy. 
+
+Theoretically, taking a short position in commodities when market excitement starts to cool should be profitable. This situation is indicated by stabilizing overbought conditions, the `HIGH_TO_LOWER` group. However, the current version of the `bb_cooling` feature does not support this assumption. 
+
+Please note that the `bb_cooling` feature is rudimentary. You would better not use it for real-world trading without substantial enhancements.
+
+## Continuous Feature Example
+
+The `add_bb_forecast` function adds a `forecast_bb` column to the data, serving as a rudimentary trend strength indicator. Typically, folks plot Bollinger Bands where the absolute value of this indicator exceeds 2.0 or 2.2. A price crossing above the upper Bollinger Band signals overbought conditions. Also, a price crossing below the lower Bollinger Band signals oversold conditions.
