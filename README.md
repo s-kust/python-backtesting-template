@@ -85,4 +85,12 @@ Please note that the `bb_cooling` feature is rudimentary. You would better not u
 
 ## Continuous Feature Example
 
-The `add_bb_forecast` function adds a `forecast_bb` column to the data, serving as a rudimentary trend strength indicator. Typically, folks plot Bollinger Bands where the absolute value of this indicator exceeds 2.0 or 2.2. A price crossing above the upper Bollinger Band signals overbought conditions. Also, a price crossing below the lower Bollinger Band signals oversold conditions.
+The `add_bb_forecast` function adds a `forecast_bb` column to the data. This column serves as a rudimentary trend strength indicator. Typically, folks plot Bollinger Bands where the absolute value of this indicator exceeds 2.0 or 2.2. A price crossing above the upper Bollinger Band signals overbought conditions. Also, a price crossing below the lower Bollinger Band signals oversold conditions.
+
+The `analyze_fwd_ret_by_bb_group` function demonstrates the analysis of the continuous feature `forecast_bb`. Initially, it adds a new column to the data, labeling each row according to the group the current `forecast_bb` value falls into. The function `add_feature_group_col_to_df` is responsible for it. This function has some intricacies worth examining closely. 
+
+You can easily customize the splitting of continuous features into groups and the ordering of those groups. For each feature value, the feature's custom function `get_group_label_XXX` returns its label. The new column `new_col_name` stores this label.
+
+After adding group labels, the main function `analyze_fwd_ret_by_bb_group` calls `analyze_values_by_group` function to calculate average returns over the next few days for each group, along with their confidence interval. The results for all groups are then saved to an Excel file in a format that is easy to review and compare.
+
+In addition to splitting into groups and analyzing these groups, you can perform a linear regression of the `ret_{NUM_DAYS_FWD_RETURN}` column against the continuous feature column. Information on how to conduct a linear regression and interpret its results is readily available elsewhere.

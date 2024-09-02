@@ -20,11 +20,11 @@ def add_feature_group_col_to_df(
     get_label_for_group: Callable,
 ) -> pd.DataFrame:
     """
-    Break a continuous feature into discrete groups
+    Break a continuous feature into discretionary groups
     in order to then conduct an analysis of these groups.
     Input: DataFrame with some feature in column continuous_feature_col_name.
     For each feature value, its label is determined
-    using the function get_label_for_group
+    using the group's custom function get_group_label_XXX
     and saved in a new column new_col_name.
     """
 
