@@ -2,7 +2,10 @@ import os
 
 import pandas as pd
 import requests
+
 from constants import DATA_FILES_EXTENSION, LOCAL_FOLDER, TICKERS_DATA_FILENAMES_PREFIX
+
+from .misc import ensure_df_has_all_required_columns
 
 ALPHA_VANTAGE_API_KEY = os.environ.get("alpha_vantage_key")
 
@@ -89,13 +92,20 @@ def _get_local_ticker_data_file_name(ticker: str) -> str:
     return LOCAL_FOLDER + TICKERS_DATA_FILENAMES_PREFIX + ticker + DATA_FILES_EXTENSION
 
 
-def add_atr_col_to_df(df: pd.DataFrame, n: int = 5) -> pd.DataFrame:
+def add_atr_col_to_df(
+    df: pd.DataFrame, n: int = 5, exponential: bool = False
+) -> pd.DataFrame:
     """
-    Average true range is a volatility estimate
-    ewm - exponentially weighted values,
-    to give more weight to the recent data point
+    Add ATR (Average True Range) column to DataFrame.
+    Average True Range is a volatility estimate.
+    n - number of periods.
+    If exponential is true,
+    use ewm - exponentially weighted values,
+    to give more weight to the recent data point.
+    Otherwise, calculate simple moving average.
     """
-    # TODO process error of missing columns
+
+    ensure_df_has_all_required_columns(df=df, volume_col_required=False)
     data = df.copy(deep=True)
     high = data["High"]
     low = data["Low"]
@@ -108,9 +118,13 @@ def add_atr_col_to_df(df: pd.DataFrame, n: int = 5) -> pd.DataFrame:
     # today we know yesterday's TR only, not today's TR
     data["tr"] = data["tr"].shift()
 
-    data[f"atr_{n}"] = (
-        data["tr"].ewm(alpha=2 / (n + 1), min_periods=n, adjust=False).mean()
-    )
+    if exponential:
+        data[f"atr_{n}"] = (
+            data["tr"].ewm(alpha=2 / (n + 1), min_periods=n, adjust=False).mean()
+        )
+    else:
+        data[f"atr_{n}"] = data["tr"].rolling(window=n, min_periods=n).mean()
+
     del data["tr0"]
     del data["tr1"]
     del data["tr2"]

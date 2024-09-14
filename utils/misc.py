@@ -1,6 +1,23 @@
+import inspect
 from typing import Callable
 
 import pandas as pd
+
+
+def ensure_df_has_all_required_columns(
+    df: pd.DataFrame, volume_col_required: bool = False
+):
+    if volume_col_required:
+        required_columns = ["Open", "High", "Low", "Close", "Volume"]
+    else:
+        required_columns = ["Open", "High", "Low", "Close"]
+    df_columns = df.columns
+    for col_name in required_columns:
+        if col_name not in df_columns:
+            caller = inspect.stack()[1].function
+            raise ValueError(
+                f"OHLC DataFrame must contain columns: {required_columns}, absent column {col_name}, checked by {caller} function"
+            )
 
 
 def add_z_score_col_to_df(
