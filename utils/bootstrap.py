@@ -12,6 +12,7 @@ def get_bootstrapped_mean_ci(data: np.typing.NDArray[np.float64]) -> dict:
     Calculate the mean value and determine the left and right boundaries
     of the confidence interval using the bootstrap method.
     """
+    data = data[~np.isnan(data)]
     confidence_level = BOOTSTRAP_CONFIDENCE_LEVEL
     if len(data) <= 3:
         return {
