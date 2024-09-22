@@ -1,5 +1,5 @@
 import sys
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,7 @@ from .get_stat_and_trades_for_ticker import get_stat_and_trades_for_ticker
 
 
 def run_all_tickers(
+    tickers: List[str] = tickers_all,
     max_trade_duration_long: Optional[int] = None,
     max_trade_duration_short: Optional[int] = None,
     strategy_params: Optional[dict] = None,
@@ -23,10 +24,6 @@ def run_all_tickers(
     4. Save them to xlsx file.
     5. Return mean value of SQN_modified.
     """
-    tickers = tickers_all
-    # tickers = ["SOYB"]
-    # tickers = ["QQQ", "XME"]
-    # tickers = ["QQQ"]
 
     res = pd.DataFrame()
     counter = 0
@@ -35,7 +32,6 @@ def run_all_tickers(
         counter = counter + 1
         print("", file=sys.stderr)
         print(f"Running {ticker=}, {counter} of {total_len}...", file=sys.stderr)
-        print("", file=sys.stderr)
 
         # NOTE You can run get_stat_and_trades_for_ticker
         # with some feature (feature_col_name=something)
