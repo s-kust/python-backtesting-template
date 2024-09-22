@@ -94,3 +94,27 @@ You can easily customize the splitting of continuous features into groups and th
 After adding group labels, the main function `analyze_fwd_ret_by_bb_group` calls `analyze_values_by_group` function to calculate average returns over the next few days for each group, along with their confidence interval. The results for all groups are then saved to an Excel file in a format that is easy to review and compare.
 
 In addition to splitting into groups and analyzing these groups, you can perform a linear regression of the `ret_{NUM_DAYS_FWD_RETURN}` column against the continuous feature column. Information on how to conduct a linear regression and interpret its results is readily available elsewhere.
+
+# A Real-Life Example
+
+I hope you find the example below helpful and inspiring. To do something similar, use the `run_strategy_main.py` or `optimize_params.py` file.
+
+I recently tested a feature represented in the OHLC DataFrame as a Boolean column. When its value was occasionally True, it signaled the system to open a short position. The system would hold this position until either the `max_trade_duration_short` expired or some special situation triggered an earlier closure.
+
+There are certain conditions where it may be wise to close the position early, even if no special situation has been triggered and the `max_trade_duration_short` has not yet expired.
+
+The primary task was to test various values of the `max_trade_duration_short` variable. Regarding special situations, I determined that `take_profit` and `volatility_spike` were irrelevant for this feature, so I commented them out in the `process_special_situations` function. 
+
+To test the custom conditions for closing a position early, I created and ran two variations of the `get_desired_current_position_size` function, referred to as **position_size - V1** and **V2** in the table below. Alternatively, I could test these conditions by adding a custom special situation.
+
+In addition to testing different `max_trade_duration_short` values and custom conditions for early position closing, I also evaluated whether the system should handle the `hammer` and `partial_close` special situations. I have easily accomplished this by commenting out specific sections of the `process_special_situations` function code.
+
+For each variation of the parameters mentioned above, the system conducted backtests on 11 different stock and ETF tickers. The resulting data shows the average `SQN_modified` value across all tickers. The table below presents these results partially.
+
+![Trading strategy backtesting results](./img/real_life_1.PNG)
+
+The longer the system keeps short positions open, the more volatile the results become. It leads to a decrease in the average `SQN_modified` value. The other parameters have little impact on the outcome. However, it looks beneficial to handle the `hammer` and `partial_close` special situations and to use the `get_desired_current_position_size V1` function.
+
+# Conclusion
+
+This repository contains a substantial amount of Python code. Unfortunately, its structure is quite complex. Due to limitations in the original `backtesting` package, simplifying it isn't feasible. Learning the available features and understanding the code's intricacies will take time and effort, but I believe it will be a worthwhile investment for you.
