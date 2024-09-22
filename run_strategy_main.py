@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # here you can set maximum duration
     # for long and short trades - number of days
     max_trade_duration_long: Optional[int] = None
-    max_trade_duration_short: Optional[int] = 4
+    max_trade_duration_short: Optional[int] = None
 
     # Here you can add different parameters of your strategy.
     # They will eventually be passed to get_desired_current_position_size()
@@ -35,5 +35,6 @@ if __name__ == "__main__":
         max_trade_duration_long=max_trade_duration_long,
         max_trade_duration_short=max_trade_duration_short,
         strategy_params=strategy_params,
+        save_all_trades_in_xlsx=False,
     )
     logging.debug(f"{SQN_modified_mean=}")

@@ -16,6 +16,7 @@ def run_all_tickers(
     max_trade_duration_long: Optional[int] = None,
     max_trade_duration_short: Optional[int] = None,
     strategy_params: Optional[dict] = None,
+    save_all_trades_in_xlsx: bool = False,
 ) -> float:
     """
     1. For every ticker, run get_stat_and_trades.
@@ -25,7 +26,9 @@ def run_all_tickers(
     5. Return mean value of SQN_modified.
     """
 
-    res = pd.DataFrame()
+    performance_res = pd.DataFrame()
+    if save_all_trades_in_xlsx:
+        all_trades = pd.DataFrame()
     counter = 0
     total_len = len(tickers)
     for ticker in tickers:
@@ -55,7 +58,14 @@ def run_all_tickers(
         # Good value for this indicator is above 0,2.
         stat["SQN_modified"] = stat["SQN"] / np.sqrt(stat["# Trades"])
 
-        res[ticker] = stat
+        performance_res[ticker] = stat
+
+        if save_all_trades_in_xlsx:
+            trades_df["Ticker"] = ticker
+            all_trades = pd.concat([all_trades, trades_df])
+
     if len(tickers) > 1:
-        res.to_excel("output.xlsx")
-    return res.loc["SQN_modified", :].mean()
+        performance_res.to_excel("output.xlsx")
+    if save_all_trades_in_xlsx:
+        all_trades.to_excel("all_trades.xlsx", index=False)
+    return performance_res.loc["SQN_modified", :].mean()
