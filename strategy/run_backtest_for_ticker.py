@@ -39,12 +39,17 @@ def run_backtest_for_ticker(
             """
             1. For every open trade, update stop-loss.
 
-            2. Process special situations. If special situation detected,
-            it is already processed, so don't execute step 3 at this day, only step 4.
+            2. Process special situations.
 
-            3. Call get_desired_current_position_size and adjust_position.
+            If at least one special situation is detected,
+            it means that we need to close all open positions
+            and don't open any new positions at this day.
+            The system calls the add_tag_to_trades_and_close_position().
+            No need to execute step 3 at this day, only step 4.
 
-            4. If it's the last day of data series, fill last_day_result.
+            3. Call get_desired_current_position_size() and adjust_position().
+
+            4. If it's the last day of data series, fill the last_day_result dict.
             """
 
             # 1
@@ -56,7 +61,8 @@ def run_backtest_for_ticker(
             all_current_trades = all_current_trades_info(strategy=self)
             log_initial_data_for_today(strategy=self, ticker=ticker)
 
-            # 2
+            # 2 -
+            # NOTE ss - special situation
             ss_today = False
             today_special_situation_msg = None
             if self.trades:

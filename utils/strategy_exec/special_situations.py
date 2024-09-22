@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Tuple
 
 from backtesting import Strategy
+
 from constants import (
     CLOSED_HAMMER,
     CLOSED_MAX_DURATION,
@@ -174,6 +175,11 @@ def process_special_situations(
     process it (usually close all trades)
     and return True as a signal to do nothing else today
     """
+    # NOTE Recommended actions here are:
+    # - Comment out special situations that you don't want to handle.
+    # - Add your custom special situations.
+    # - Try to change the order in which special situations are handled.
+
     if process_max_duration(
         strategy=strategy,
         max_trade_duration_long=max_trade_duration_long,
