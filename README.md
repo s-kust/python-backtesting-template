@@ -21,6 +21,22 @@ Just like with the original Python `backtesting` package, you can obtain and use
 
 8. You can optimize different parameters of your strategy. See the variable `strategy_params`, its filling in `run_strategy_main.py` and its usage in the `get_desired_current_position_size` function. 
 
+# Workflow Overview
+
+Like the original `backtesting` package, most work happens within the `next` function of the `Strategy` you create. The system calls this function each day of your OHLC data, starting from the first day. 
+
+Here’s what happens inside this function in the `run_backtest_for_ticker.py` file:
+1. Update the trailing stop-losses for all open trades.
+2. If we have open trades, check for special situations. (See more details on special situations in the following section.)
+3. If no special situations are found, calculate the desired position size. If it differs significantly from the current size, buy or sell additional shares.
+4. If today is the last day in the data, the system calls the `create_last_day_results` function, which populates and returns the `last_day_result` dictionary.
+
+The system calls the `get_desired_current_position_size` function to determine the current and desired position sizes. If the desired position size is 0, the system closes all open trades. If it's `None`, no calculation of the difference between the current and desired position sizes is needed, and no buy or sell orders are placed with the broker.
+
+After the finish of the backtest, the `get_stat_and_trades_for_ticker` function returns the `last_day_result` dictionary together with other results. This dictionary is then passed to the `process_last_day_res` function. This function is intended to send you notifications when specific conditions are met. However, it has not been implemented yet. 
+
+It is assumed that you will not change the code of the `next` function. The main goal of this repository is to free you from the effort of writing and modifying it. Instead, you can focus on coding the rules for determining the desired position size in the `get_desired_current_position_size` function. Also, try to change the list of special situations to check within the `process_special_situations` function. Additionally, you should implement one or more functions to create your features.
+
 # Quick Start
 
 The system currently uses [Alpha Vantage](https://www.alphavantage.co/) as its main source of OHLC data. If you want to change it, modify the `import_ohlc_daily` function. 
@@ -99,9 +115,7 @@ In addition to splitting into groups and analyzing these groups, you can perform
 
 I hope you find the example below helpful and inspiring. To do something similar, use the `run_strategy_main.py` or `optimize_params.py` file.
 
-I recently tested a feature represented in the OHLC DataFrame as a Boolean column. When its value was occasionally True, it signaled the system to open a short position. The system would hold this position until either the `max_trade_duration_short` expired or some special situation triggered an earlier closure.
-
-There are certain conditions where it may be wise to close the position early, even if no special situation has been triggered and the `max_trade_duration_short` has not yet expired.
+I recently tested a feature represented in the OHLC DataFrame as a Boolean column. When its value was occasionally True, it signaled the system to open a short position. The system would hold this position until either the `max_trade_duration_short` expired or some special situation triggered an earlier closure. Also, there are certain conditions where it may be wise to close the position early, even if no special situation has been triggered and the `max_trade_duration_short` has not yet expired.
 
 The primary task was to test various values of the `max_trade_duration_short` variable. Regarding special situations, I determined that `take_profit` and `volatility_spike` were irrelevant for this feature, so I commented them out in the `process_special_situations` function. 
 
