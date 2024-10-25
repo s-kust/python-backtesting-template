@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from backtesting import Backtest, Strategy
 
-from customizable import get_desired_current_position_size
+from customizable import StrategyParams, get_desired_current_position_size
 from utils.misc import get_forecast_bb
 from utils.strategy_exec import (
     adjust_position,
@@ -20,9 +20,7 @@ from utils.strategy_exec import (
 def run_backtest_for_ticker(
     ticker: str,
     data: pd.DataFrame,
-    max_trade_duration_long: Optional[int] = None,
-    max_trade_duration_short: Optional[int] = None,
-    strategy_params: Optional[dict] = None,
+    strategy_params: StrategyParams,
 ) -> Tuple[pd.Series, pd.DataFrame, dict]:
     local_env = os.environ.get("environment", default="prod")
     last_day_result = dict()
@@ -30,6 +28,11 @@ def run_backtest_for_ticker(
 
     class CustomTradingStrategy1(Strategy):
         def init(self):
+
+            # self.parameters are heavily used
+            # in get_desired_current_position_size()
+            # and process_special_situations()
+            self.parameters = strategy_params
 
             # NOTE This forecast is used only
             # in several special situations, not very meaningful.
@@ -73,9 +76,7 @@ def run_backtest_for_ticker(
             today_special_situation_msg = None
             if self.trades:
                 ss_today, today_special_situation_msg = process_special_situations(
-                    strategy=self,
-                    max_trade_duration_long=max_trade_duration_long,
-                    max_trade_duration_short=max_trade_duration_short,
+                    strategy=self
                 )
             if ss_today:
                 # extraordinary step 4, because now we’ll finish
@@ -97,7 +98,6 @@ def run_backtest_for_ticker(
                 desired_size_msg,
             ) = get_desired_current_position_size(
                 strategy=self,
-                strategy_params=strategy_params,
             )
             logging.debug(f"{desired_size=}")
             today_action = adjust_position(

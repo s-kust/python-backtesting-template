@@ -4,6 +4,7 @@ from typing import Optional
 from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
+from customizable import StrategyParams
 from strategy import run_all_tickers
 
 logging.basicConfig(
@@ -21,20 +22,20 @@ if __name__ == "__main__":
     # clear LOG_FILE every time
     open(LOG_FILE, "w").close()
 
-    # here you can set maximum duration
-    # for long and short trades - number of days
-    max_trade_duration_long: Optional[int] = None
-    max_trade_duration_short: Optional[int] = None
+    # Here you can set different parameters of your strategy.
+    # They will eventually be passed
+    # to get_desired_current_position_size()
+    # and process_special_situations()
+    # See also the internals of the StrategyParams class
 
-    # Here you can add different parameters of your strategy.
-    # They will eventually be passed to get_desired_current_position_size()
-    strategy_params: Optional[dict] = None
+    strategy_params = StrategyParams(
+        max_trade_duration_long=None,
+        max_trade_duration_short=None,
+        profit_target_pct=7.7,
+    )
 
     SQN_modified_mean = run_all_tickers(
         tickers=tickers_all,
-        max_trade_duration_long=max_trade_duration_long,
-        max_trade_duration_short=max_trade_duration_short,
         strategy_params=strategy_params,
-        save_all_trades_in_xlsx=False,
     )
     logging.debug(f"{SQN_modified_mean=}")

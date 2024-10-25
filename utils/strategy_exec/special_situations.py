@@ -139,9 +139,11 @@ def process_volatility_spike(strategy: Strategy) -> bool:
 
 def process_max_duration(
     strategy: Strategy,
-    max_trade_duration_long: Optional[int] = None,
-    max_trade_duration_short: Optional[int] = None,
 ) -> bool:
+
+    max_trade_duration_long = strategy.parameters.max_trade_duration_long
+    max_trade_duration_short = strategy.parameters.max_trade_duration_short
+
     if max_trade_duration_long is None and max_trade_duration_short is None:
         return False
     all_trade_durations = [
@@ -171,8 +173,6 @@ def process_max_duration(
 
 def process_special_situations(
     strategy: Strategy,
-    max_trade_duration_long: Optional[int] = None,
-    max_trade_duration_short: Optional[int] = None,
 ) -> Tuple[bool, str]:
     """
     If some special situation (SS) occurred today,
@@ -186,8 +186,6 @@ def process_special_situations(
 
     if process_max_duration(
         strategy=strategy,
-        max_trade_duration_long=max_trade_duration_long,
-        max_trade_duration_short=max_trade_duration_short,
     ):
         log_all_trades(strategy=strategy)
         return True, SS_MAX_DURATION

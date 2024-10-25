@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from constants import tickers_all
-from customizable import add_features_v1_basic
+from customizable import StrategyParams, add_features_v1_basic
 from utils.atr import add_tr_delta_col_to_ohlc
 from utils.import_data import import_ohlc_daily
 from utils.strategy_exec import process_last_day_res
@@ -25,11 +25,9 @@ def _add_feature_to_trades(
 
 def get_stat_and_trades(
     ohlc_with_feature: pd.DataFrame,
+    strategy_params: StrategyParams,
     ticker: str,
-    max_trade_duration_long: Optional[int] = None,
-    max_trade_duration_short: Optional[int] = None,
     feature_col_name: Optional[str] = None,
-    strategy_params: Optional[dict] = None,
 ) -> Tuple[pd.Series, pd.DataFrame, dict]:
     """
     For ticker, run backtest,
@@ -41,14 +39,12 @@ def get_stat_and_trades(
     stat, trades, last_day_result = run_backtest_for_ticker(
         ticker=ticker,
         data=ohlc_with_feature,
-        max_trade_duration_long=max_trade_duration_long,
-        max_trade_duration_short=max_trade_duration_short,
         strategy_params=strategy_params,
     )
 
     # NOTE If feature_col_name is None,
     # return stat and trades without added feature,
-    # otherwise run add_feature_to_trades and then return
+    # otherwise run add_feature_to_trades() and then return
     if feature_col_name:
         return (
             stat,
@@ -64,11 +60,8 @@ def get_stat_and_trades(
 
 
 def run_all_tickers(
+    strategy_params: StrategyParams,
     tickers: List[str] = tickers_all,
-    max_trade_duration_long: Optional[int] = None,
-    max_trade_duration_short: Optional[int] = None,
-    strategy_params: Optional[dict] = None,
-    save_all_trades_in_xlsx: bool = False,
 ) -> float:
     """
     1. For every ticker, run get_stat_and_trades.
@@ -79,7 +72,7 @@ def run_all_tickers(
     """
 
     performance_res = pd.DataFrame()
-    if save_all_trades_in_xlsx:
+    if strategy_params.save_all_trades_in_xlsx:
         all_trades = pd.DataFrame()
     counter = 0
     total_len = len(tickers)
@@ -103,8 +96,6 @@ def run_all_tickers(
         stat, trades_df, last_day_result = get_stat_and_trades(
             ohlc_with_feature=ticker_data,
             ticker=ticker,
-            max_trade_duration_long=max_trade_duration_long,
-            max_trade_duration_short=max_trade_duration_short,
             feature_col_name=None,
             strategy_params=strategy_params,
         )
@@ -120,12 +111,12 @@ def run_all_tickers(
 
         performance_res[ticker] = stat
 
-        if save_all_trades_in_xlsx:
+        if strategy_params.save_all_trades_in_xlsx:
             trades_df["Ticker"] = ticker
             all_trades = pd.concat([all_trades, trades_df])
 
     if len(tickers) > 1:
         performance_res.to_excel("output.xlsx")
-    if save_all_trades_in_xlsx:
+    if strategy_params.save_all_trades_in_xlsx:
         all_trades.to_excel("all_trades.xlsx", index=False)
     return performance_res.loc["SQN_modified", :].mean()

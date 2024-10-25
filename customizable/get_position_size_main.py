@@ -11,7 +11,6 @@ np.random.seed(47)  # to make results reproducible
 
 def get_desired_current_position_size(
     strategy: Strategy,
-    strategy_params: Optional[dict] = None,
 ) -> Tuple[Optional[float], float, str]:
     """
     Extract data from the strategy, as well as from strategy_params,
@@ -46,17 +45,23 @@ def get_desired_current_position_size(
     # NOTE param_1 and param_1 are fake examples
     # of some parameters that you may want to optimize.
     # You can have from zero to a large number of such parameters.
-    # See also the file optimize_params.py
+    # See also the internals of the class StrategyParams
+    # and file optimize_params.py
 
     # default values
     param_1 = 1.3
     param_2 = 2
 
-    if strategy_params:
-        if "param_1" in strategy_params and strategy_params["param_1"] is not None:
-            param_1 = strategy_params["param_1"]
-        if "param_2" in strategy_params and strategy_params["param_2"] is not None:
-            param_2 = strategy_params["param_2"]
+    if (
+        hasattr(strategy.parameters, "param_1")
+        and strategy.parameters.param_1 is not None
+    ):
+        param_1 = strategy.parameters.param_1
+    if (
+        hasattr(strategy.parameters, "param_2")
+        and strategy.parameters.param_2 is not None
+    ):
+        param_2 = strategy.parameters.param_2
 
     # Below is a stub that you can substitute with your code.
     # If the current position size is not zero,
