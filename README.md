@@ -1,6 +1,8 @@
 # python-backtesting-template
 Trading strategy template that uses Python `backtesting` library. It lets you focus on improving your price forecasts and reduces the time and effort spent on auxiliary tasks.
 
+**WARNING! This repository is currently being actively developed. The README.md doc is partly out of date. I will update it later.**
+
 # Understanding the Benefits of This Repo
 
 Just like with the original Python `backtesting` package, you can obtain and use `stats`, `trades`, and interactive charts in HTML files. In addition, this repository solves many problems that the `backtesting` library does not solve.

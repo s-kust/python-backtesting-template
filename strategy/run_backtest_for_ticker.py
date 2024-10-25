@@ -12,6 +12,8 @@ from utils.strategy_exec import (
     all_current_trades_info,
     create_last_day_results,
     log_initial_data_for_today,
+    process_profit_targets_long_trades,
+    process_profit_targets_short_trades,
     process_special_situations,
     update_stop_losses,
 )
@@ -46,7 +48,7 @@ def run_backtest_for_ticker(
 
         def next(self):
             """
-            1. For every open trade, update stop-loss.
+            1. For every open trade, update stop-loss and process profit target.
 
             2. Process special situations.
 
@@ -64,6 +66,10 @@ def run_backtest_for_ticker(
             # 1
             logging.debug("\n")
             update_stop_losses(strategy=self)
+            if self.parameters.profit_target_long_pct is not None:
+                process_profit_targets_long_trades(strategy=self)
+            if self.parameters.profit_target_short_pct is not None:
+                process_profit_targets_short_trades(strategy=self)
 
             # preparations for 4
             current_position_num_stocks = self.position.size

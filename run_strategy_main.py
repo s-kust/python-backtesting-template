@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import Optional
 
 from dotenv import load_dotenv
@@ -29,9 +30,11 @@ if __name__ == "__main__":
     # See also the internals of the StrategyParams class
 
     strategy_params = StrategyParams(
-        max_trade_duration_long=None,
-        max_trade_duration_short=None,
-        profit_target_pct=7.7,
+        max_trade_duration_long=4,
+        max_trade_duration_short=4,
+        profit_target_long_pct=0.92,
+        profit_target_short_pct=0.112,
+        save_all_trades_in_xlsx=True,
     )
 
     SQN_modified_mean = run_all_tickers(
@@ -39,3 +42,4 @@ if __name__ == "__main__":
         strategy_params=strategy_params,
     )
     logging.debug(f"{SQN_modified_mean=}")
+    print(f"{SQN_modified_mean=}", file=sys.stderr)
