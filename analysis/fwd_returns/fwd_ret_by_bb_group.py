@@ -6,10 +6,11 @@ import pandas as pd
 
 from constants import LOG_FILE, NUM_DAYS_FWD_RETURN
 from utils.bootstrap import analyze_values_by_group
+from utils.get_df_with_fwd_ret import get_df_with_fwd_ret
 from utils.grouping.bollinger import get_group_label_forecast_bb, group_order_bb
 from utils.local_data import TickersData
 from utils.misc import add_feature_group_col_to_df
-from utils.prepare_df import add_bb_forecast_to_ohlc, get_df_with_fwd_ret
+from utils.prepare_df import add_bb_forecast_to_ohlc
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -1,5 +1,3 @@
-from typing import Callable
-
 import pandas as pd
 
 from features.shooting_star import check_shooting_star_candle
@@ -8,13 +6,14 @@ from forecast.forecast_bb import add_bb_forecast
 
 def add_bb_forecast_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
 
-    # NOTE. You can have and support multiple similar functions
+    # NOTE. You can have multiple similar functions
     # with different sets of features and forecasts.
-    # The function you want to use now needs to be passed
-    # as add_features_forecasts_func parameter
-    # when calling the function get_stat_and_trades_for_ticker.
+    # Call the function you want to use
+    # inside the run_all_tickers function.
 
     res = df.copy()
+
+    # NOTE better don't remove this line
     res = add_bb_forecast(df=res, col_name="Close")
 
     # res["feature_ys_negative_advanced"] = (
@@ -90,29 +89,6 @@ def add_bb_cooling_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
     res["forecast_bb_yesterday"] = res["forecast_bb"].shift(1)
     res["bb_cooling"] = res.apply(_get_bb_cooling_label, axis=1)
     del res["forecast_bb_yesterday"]
-    return res
-
-
-def get_df_with_fwd_ret(
-    ohlc_df: pd.DataFrame,
-    num_days: int = 24,
-    add_features_forecasts_func: Callable = add_bb_forecast_to_ohlc,
-) -> pd.DataFrame:
-
-    """
-    This function is used if you want to analyze
-    forward Close-Close returns rather than trades.
-    1. Call add_features_forecasts_func.
-    2. Add new column containing forward Close-Close return - ret_{str(num_days)}.
-    """
-    res = ohlc_df.copy()
-    res = add_features_forecasts_func(df=res)
-    res[f"Close_fwd_{str(num_days)}"] = res["Close"].shift(-num_days)
-    res[f"ret_{str(num_days)}"] = (
-        (res[f"Close_fwd_{str(num_days)}"] - res["Close"]) / res["Close"]
-    ) * 100
-    res[f"ret_{str(num_days)}"] = round(res[f"ret_{str(num_days)}"], 2)
-    del res[f"Close_fwd_{str(num_days)}"]
     return res
 
 
