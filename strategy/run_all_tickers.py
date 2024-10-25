@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 
 from constants import tickers_all
+from customizable import add_features_v1_basic
 from utils.atr import add_tr_delta_col_to_ohlc
 from utils.import_data import import_ohlc_daily
-from utils.prepare_df import add_features_v1_basic
 from utils.strategy_exec import process_last_day_res
 
 from .run_backtest_for_ticker import run_backtest_for_ticker

@@ -9,7 +9,6 @@ from forecast.forecast_bb import add_bb_forecast
 from utils.bootstrap import analyze_values_by_group
 from utils.get_df_with_fwd_ret import get_df_with_fwd_ret
 from utils.local_data import TickersData
-from utils.prepare_df import add_bb_cooling_to_ohlc
 
 logging.basicConfig(
     level=logging.DEBUG,

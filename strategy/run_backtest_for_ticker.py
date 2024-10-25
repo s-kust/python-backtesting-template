@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from backtesting import Backtest, Strategy
 
-from get_position_size_main import get_desired_current_position_size
+from customizable import get_desired_current_position_size
 from utils.misc import get_forecast_bb
 from utils.strategy_exec import (
     adjust_position,
