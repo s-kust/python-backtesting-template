@@ -1,13 +1,9 @@
-import sys
 from typing import Callable
 
 import pandas as pd
 
-from constants import tickers_all
 from features.shooting_star import check_shooting_star_candle
 from forecast.forecast_bb import add_bb_forecast
-
-from .import_data import add_atr_col_to_df, import_ohlc_daily
 
 
 def add_bb_forecast_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:

@@ -3,7 +3,8 @@ from typing import Callable, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from utils.import_data import add_atr_col_to_df, import_ohlc_daily
+from utils.atr import add_atr_col_to_df
+from utils.import_data import import_ohlc_daily
 
 from .run_backtest_for_ticker import run_backtest_for_ticker
 
