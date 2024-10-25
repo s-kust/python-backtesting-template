@@ -19,7 +19,7 @@ SS_PARTIAL_CLOSE = "SS Partial close"
 SS_HAMMER = "SS Hammer"
 SS_SHOOTING_STAR = "SS Shooting star"
 SS_VOLATILITY_SPIKE = "SS Volatility spike"
-SS_TAKE_PROFIT = "SS Take profit"
+SS_OVERBOUGHT_OVERSOLD = "SS Overbought / Oversold"
 SS_MAX_DURATION = "SS Max trade duration exceeded"
 
 # DPS - desired position size

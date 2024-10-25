@@ -95,7 +95,7 @@ def run_all_tickers(
         # to add forecasts and features that you want
         ticker_data = add_features_v1_basic(df=ticker_data)
 
-        # NOTE You can run get_stat_and_trades_for_ticker
+        # NOTE You can run get_stat_and_trades
         # with some feature (feature_col_name=something) or without it.
         # If feature_col_name is provided, feature value at the start date
         # is added to every trade in trades DataFrame (trades_df).

@@ -30,8 +30,14 @@ def run_backtest_for_ticker(
 
     class CustomTradingStrategy1(Strategy):
         def init(self):
-            # create some forecast and use it here
+
+            # NOTE This forecast is used only
+            # in several special situations, not very meaningful.
+            # You configure the really important stuff
+            # inside get_desired_current_position_size and add_features_XXX functions
+            # and in special situations.
             self.forecast = self.I(get_forecast_bb, data)
+
             # NOTE ATR is used in update_stop_losses
             self.atr = pd.Series(self.data.tr).rolling(50).mean().bfill().values
 
@@ -121,7 +127,7 @@ def run_backtest_for_ticker(
         # Commission set to 0.1% for trade enter and the same for exit,
         # so you need average profit at least 0.2%.
         commission=0.001,
-        trade_on_close=True,  # Execute trading signals on today's close price
+        trade_on_close=False,  # Execute trading signals on today's close price or tomorrow at the open
         exclusive_orders=False,
         # hedging=False - can't hold long and short position simultaneously,
         # see also process_max_duration function

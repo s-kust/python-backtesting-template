@@ -11,9 +11,9 @@ from constants import (
     SS_HAMMER,
     SS_MAX_DURATION,
     SS_NO_TODAY,
+    SS_OVERBOUGHT_OVERSOLD,
     SS_PARTIAL_CLOSE,
     SS_SHOOTING_STAR,
-    SS_TAKE_PROFIT,
     SS_VOLATILITY_SPIKE,
     TP_TRIGGERED,
 )
@@ -24,12 +24,16 @@ from .misc import add_tag_to_trades_and_close_position, log_all_trades
 from .partial_close import process_partial_close
 
 
-def process_take_profit(strategy: Strategy) -> bool:
+def process_overbought_oversold(strategy: Strategy) -> bool:
     """
     Take profit if yesterday close price
     was above Bollinger band (abs(yesterday_forecast) > 2.1)
     and today abs(today_forecast) < abs(yesterday_forecast).
     """
+
+    # TODO split to two special situations: overbought and oversold,
+    # process them separately and test
+
     if strategy.trades:
 
         # NOTE This is worse than using PnL of the last trade
@@ -188,9 +192,9 @@ def process_special_situations(
         log_all_trades(strategy=strategy)
         return True, SS_MAX_DURATION
 
-    if process_take_profit(strategy=strategy):
-        log_all_trades(strategy=strategy)
-        return True, SS_TAKE_PROFIT
+    # if process_overbought_oversold(strategy=strategy):
+    #     log_all_trades(strategy=strategy)
+    #     return True, SS_OVERBOUGHT_OVERSOLD
 
     if process_volatility_spike(strategy=strategy):
         log_all_trades(strategy=strategy)
