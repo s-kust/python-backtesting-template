@@ -73,6 +73,9 @@ tickers_stocks = [
     "XME",
 ]
 
+
+LOCAL_DAILY_OHLC_RAW_PKL = "ohlc_daily_raw.pkl"
+LOCAL_DAILY_OHLC_WITH_FEATURES_PKL = "ohlc_daily_with_features.pkl"
 LOG_FILE = "app_run.log"
 
 ACTION_BUY = "Buy"

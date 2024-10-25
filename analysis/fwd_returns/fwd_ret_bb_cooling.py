@@ -6,7 +6,8 @@ import pandas as pd
 
 from constants import LOG_FILE, NUM_DAYS_FWD_RETURN
 from utils.bootstrap import analyze_values_by_group
-from utils.prepare_df import TickersData, add_bb_cooling_to_ohlc, get_df_with_fwd_ret
+from utils.local_data import TickersData
+from utils.prepare_df import add_bb_cooling_to_ohlc, get_df_with_fwd_ret
 
 logging.basicConfig(
     level=logging.DEBUG,

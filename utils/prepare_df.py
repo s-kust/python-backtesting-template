@@ -10,34 +10,6 @@ from forecast.forecast_bb import add_bb_forecast
 from .import_data import add_atr_col_to_df, import_ohlc_daily
 
 
-class TickersData:
-    """
-    This class is used when optimizing strategy parameters.
-    Its instance stores OHLC data for tickers and delivers it as needed,
-    instead of downloading it from the Internet
-    or reading it from a local Excel file each time.
-    """
-
-    def __init__(self):
-        self.tickers_data = dict()
-        counter = 0
-        total_count = len(tickers_all)
-        for ticker in tickers_all:
-            counter = counter + 1
-            print(
-                f"Loading data for {ticker=} - {counter} of {total_count}...",
-                file=sys.stderr,
-            )
-            self.tickers_data[ticker] = import_ohlc_daily(ticker=ticker)
-        print("", file=sys.stderr)
-
-    def get_data(self, ticker: str) -> pd.DataFrame:
-        if self.tickers_data and ticker in self.tickers_data:
-            return self.tickers_data[ticker]
-        self.tickers_data[ticker] = import_ohlc_daily(ticker=ticker)
-        return self.tickers_data[ticker]
-
-
 def add_bb_forecast_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
 
     # NOTE. You can have and support multiple similar functions
@@ -48,6 +20,17 @@ def add_bb_forecast_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
 
     res = df.copy()
     res = add_bb_forecast(df=res, col_name="Close")
+
+    # res["feature_ys_negative_advanced"] = (
+    #     (res["Close"] < res["avwap_min_min"])
+    #     # & (res["Close"] < res["Close"].shift(1))
+    #     & (res["Close"].shift(1) < res["avwap_min_min"].shift(1))
+    #     & (res["Close"].shift(2) < res["avwap_min_min"].shift(2))
+    #     & (abs(res["avwap_min_min"] - res["Close"]) < (res[f"atr_14"] * 0.8))
+    #     & (res["fwd_ret_3"].shift(4) > 0)
+    #     & (res["prev_close_trend_7"].shift(4) > 0)
+    # )
+
     return res
 
 

@@ -14,7 +14,8 @@ from constants import (
     tickers_precious,
     tickers_stocks,
 )
-from utils.prepare_df import TickersData
+from utils.import_data import import_ohlc_daily
+from utils.local_data import TickersData
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     # clear LOG_FILE every time
     open(LOG_FILE, "w").close()
 
-    tickers_data = TickersData()
+    tickers_data = TickersData(tickers=tickers_all, import_ohlc_func=import_ohlc_daily)
 
     excel_file_name = f"fwd_ret_{NUM_DAYS_FWD_RETURN}_all_by_bb_group.xlsx"
     analyze_fwd_ret_by_bb_group(
