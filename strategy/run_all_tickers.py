@@ -1,5 +1,5 @@
 import sys
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -62,6 +62,7 @@ def get_stat_and_trades(
 def run_all_tickers(
     strategy_params: StrategyParams,
     tickers: List[str] = tickers_all,
+    add_features_func: Callable = add_features_v1_basic,
 ) -> float:
     """
     1. For every ticker, run get_stat_and_trades.
@@ -84,9 +85,9 @@ def run_all_tickers(
         ticker_data = import_ohlc_daily(ticker=ticker)
         ticker_data = add_tr_delta_col_to_ohlc(ticker_data)
 
-        # NOTE customize add_features_v1_basic
+        # NOTE customize add_features_func
         # to add forecasts and features that you want
-        ticker_data = add_features_v1_basic(df=ticker_data)
+        ticker_data = add_features_func(df=ticker_data)
 
         # NOTE You can run get_stat_and_trades
         # with some feature (feature_col_name=something) or without it.

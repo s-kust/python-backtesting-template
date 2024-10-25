@@ -5,7 +5,7 @@ from typing import Optional
 from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
-from customizable import StrategyParams
+from customizable import StrategyParams, add_features_v1_basic
 from strategy import run_all_tickers
 
 logging.basicConfig(
@@ -33,13 +33,14 @@ if __name__ == "__main__":
         max_trade_duration_long=4,
         max_trade_duration_short=4,
         profit_target_long_pct=0.92,
-        profit_target_short_pct=0.112,
+        profit_target_short_pct=1.912,
         save_all_trades_in_xlsx=True,
     )
 
     SQN_modified_mean = run_all_tickers(
         tickers=tickers_all,
         strategy_params=strategy_params,
+        add_features_func=add_features_v1_basic,
     )
     logging.debug(f"{SQN_modified_mean=}")
     print(f"{SQN_modified_mean=}", file=sys.stderr)
