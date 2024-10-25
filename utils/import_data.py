@@ -1,8 +1,10 @@
 import os
 import sys
+from typing import Callable
 
 import pandas as pd
 import requests
+import yfinance as yf
 
 from constants import DATA_FILES_EXTENSION, LOCAL_FOLDER, TICKERS_DATA_FILENAMES_PREFIX
 
@@ -94,7 +96,33 @@ def import_alpha_vantage_daily(ticker: str) -> pd.DataFrame:
     return data_daily
 
 
-def import_ohlc_daily(ticker: str) -> pd.DataFrame:
+def import_yahoo_daily(
+    ticker: str, period: str = "2y", interval: str = "1d"
+) -> pd.DataFrame:
+    """
+    Get OHLC DataFrame with Volume from Yahoo Finance.
+    Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max.
+    Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
+    """
+    res = yf.Ticker(ticker=ticker).history(period=period, interval=interval)
+
+    # NOTE  If period and interval mismatch, Yahoo Finance returns empty DataFrame.
+    # A mismatch is an interval too small for a long period.
+    if res.shape[0] == 0:
+        raise RuntimeError(
+            f"import_yahoo_daily: Yahoo Finance returned empty Df for {ticker=}, maybe mismatch between {period=} and {interval=}"
+        )
+
+    return res[["Open", "High", "Low", "Close", "Volume"]]
+
+
+def _get_local_ticker_data_file_name(ticker: str) -> str:
+    return LOCAL_FOLDER + TICKERS_DATA_FILENAMES_PREFIX + ticker + DATA_FILES_EXTENSION
+
+
+def import_ohlc_daily(
+    ticker: str, import_ohlc_func: Callable = import_alpha_vantage_daily
+) -> pd.DataFrame:
     """
     Check if local file with ticker data exists in /tmp/ folder.
     If yes, use it. Else, import OHLC data from AV,
@@ -103,15 +131,12 @@ def import_ohlc_daily(ticker: str) -> pd.DataFrame:
     internal_ticker = ticker.upper()
     local_file_path = _get_local_ticker_data_file_name(internal_ticker)
     print(
-        f"Calling import_ohlc_daily with {internal_ticker=}, {local_file_path=}",
+        f"import_ohlc_daily - {internal_ticker=}, {local_file_path=}",
         file=sys.stderr,
     )
     if os.path.exists(local_file_path) and os.path.getsize(local_file_path) > 0:
         return pd.read_excel(local_file_path, index_col=0)
-    res = import_alpha_vantage_daily(ticker=internal_ticker)
+    res = import_ohlc_func(ticker=internal_ticker)
+    res.index = res.index.tz_localize(None)
     res.to_excel(local_file_path)
     return pd.read_excel(local_file_path, index_col=0)
-
-
-def _get_local_ticker_data_file_name(ticker: str) -> str:
-    return LOCAL_FOLDER + TICKERS_DATA_FILENAMES_PREFIX + ticker + DATA_FILES_EXTENSION

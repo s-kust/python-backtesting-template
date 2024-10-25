@@ -1,14 +1,66 @@
 import sys
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
 from constants import tickers_all
+from utils.atr import add_tr_delta_col_to_ohlc
+from utils.import_data import import_ohlc_daily
 from utils.prepare_df import add_bb_forecast_to_ohlc
 from utils.strategy_exec import process_last_day_res
 
-from .get_stat_and_trades_for_ticker import get_stat_and_trades_for_ticker
+from .run_backtest_for_ticker import run_backtest_for_ticker
+
+
+def _add_feature_to_trades(
+    trades: pd.DataFrame, ticker_data: pd.DataFrame, feature_col_name: str
+) -> pd.DataFrame:
+    res = trades.copy()
+    res["Feature"] = np.nan
+    for index, row in trades.iterrows():
+        res.at[index, "Feature"] = ticker_data.iloc[row["EntryBar"]][feature_col_name]
+    return res
+
+
+def get_stat_and_trades(
+    ohlc_with_feature: pd.DataFrame,
+    ticker: str,
+    max_trade_duration_long: Optional[int] = None,
+    max_trade_duration_short: Optional[int] = None,
+    feature_col_name: Optional[str] = None,
+    strategy_params: Optional[dict] = None,
+) -> Tuple[pd.Series, pd.DataFrame, dict]:
+    """
+    For ticker, run backtest,
+    return stats, trades, and last_day_result.
+    If feature_col_name is provided,
+    feature value at the start date is added to every trade in trades DataFrame.
+    """
+
+    stat, trades, last_day_result = run_backtest_for_ticker(
+        ticker=ticker,
+        data=ohlc_with_feature,
+        max_trade_duration_long=max_trade_duration_long,
+        max_trade_duration_short=max_trade_duration_short,
+        strategy_params=strategy_params,
+    )
+
+    # NOTE If feature_col_name is None,
+    # return stat and trades without added feature,
+    # otherwise run add_feature_to_trades and then return
+    if feature_col_name:
+        return (
+            stat,
+            _add_feature_to_trades(
+                trades=trades,
+                ticker_data=ohlc_with_feature,
+                feature_col_name=feature_col_name,
+            ),
+            last_day_result,
+        )
+
+    return stat, trades, last_day_result
 
 
 def run_all_tickers(
@@ -36,13 +88,21 @@ def run_all_tickers(
         print("", file=sys.stderr)
         print(f"Running {ticker=}, {counter} of {total_len}...", file=sys.stderr)
 
-        # NOTE You can run get_stat_and_trades_for_ticker
-        # with some feature (feature_col_name=something)
-        # or without it
+        ticker_data = import_ohlc_daily(ticker=ticker)
+        ticker_data = add_tr_delta_col_to_ohlc(ticker_data)
 
-        stat, trades_df, last_day_result = get_stat_and_trades_for_ticker(
+        # NOTE customize add_bb_forecast_to_ohlc
+        # to add forecasts and features that you want
+        ticker_data = add_bb_forecast_to_ohlc(df=ticker_data)
+
+        # NOTE You can run get_stat_and_trades_for_ticker
+        # with some feature (feature_col_name=something) or without it.
+        # If feature_col_name is provided, feature value at the start date
+        # is added to every trade in trades DataFrame (trades_df).
+
+        stat, trades_df, last_day_result = get_stat_and_trades(
+            ohlc_with_feature=ticker_data,
             ticker=ticker,
-            add_features_forecasts_func=add_bb_forecast_to_ohlc,
             max_trade_duration_long=max_trade_duration_long,
             max_trade_duration_short=max_trade_duration_short,
             feature_col_name=None,

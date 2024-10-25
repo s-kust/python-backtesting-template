@@ -41,3 +41,29 @@ def add_atr_col_to_df(
     del data["tr2"]
     # del data["tr"]
     return data
+
+
+def add_tr_delta_col_to_ohlc(ohlc_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add tr_delta column to OHLC data
+    """
+
+    # NOTE 1. This function IS MANDATORY to call,
+    # because tr_delta is used in update_stop_losses()
+
+    # NOTE 2. tr_delta is a volatility spike indicator.
+    # It can be used when building features and forecasts.
+
+    res = ohlc_df.copy()
+    rolling_period_tr = 100
+    small_atr_period_for_delta = 3
+    res = add_atr_col_to_df(df=res, n=small_atr_period_for_delta)
+    res["tr_avg"] = (
+        res["tr"]
+        .rolling(window=rolling_period_tr, min_periods=rolling_period_tr)
+        .mean()
+    )
+    res["tr_delta"] = res[f"atr_{small_atr_period_for_delta}"] / res["tr_avg"]
+    del res["tr_avg"]
+    del res[f"atr_{small_atr_period_for_delta}"]
+    return res
