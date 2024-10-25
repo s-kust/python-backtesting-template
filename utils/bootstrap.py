@@ -7,7 +7,9 @@ from scipy.stats import bootstrap
 from constants import BOOTSTRAP_CONFIDENCE_LEVEL
 
 
-def get_bootstrapped_mean_ci(data: np.typing.NDArray[np.float64]) -> dict:
+def get_bootstrapped_mean_ci(
+    data: np.typing.NDArray[np.float64], calculate_positive_pct: bool = True
+) -> dict:
     """
     Calculate the mean value and determine the left and right boundaries
     of the confidence interval using the bootstrap method.
@@ -29,12 +31,23 @@ def get_bootstrapped_mean_ci(data: np.typing.NDArray[np.float64]) -> dict:
         random_state=1,
         method="percentile",
     ).confidence_interval
-    return {
+    if isinstance(mean_ci_left, np.floating):
+        mean_ci_left = mean_ci_left.item()
+    if isinstance(mean_ci_right, np.floating):
+        mean_ci_right = mean_ci_right.item()
+    res = {
         f"ci_left_{confidence_level}": mean_ci_left,
         "mean_val": np.mean(data),
         f"ci_right_{confidence_level}": mean_ci_right,
         "count": data.size,
     }
+    if isinstance(res["mean_val"], np.floating):
+        res["mean_val"] = res["mean_val"].item()
+    if calculate_positive_pct:
+        res["positive_pct"] = float(data[np.where(data > 0)].size) / data.size
+    for key, value in res.items():
+        res[key] = round(value, 3)
+    return res
 
 
 def analyze_values_by_group(
