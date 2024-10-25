@@ -6,7 +6,7 @@ import pandas as pd
 from backtesting import Backtest, Strategy
 
 from get_position_size_main import get_desired_current_position_size
-from utils.prepare_df import get_forecast_bb
+from utils.misc import get_forecast_bb
 from utils.strategy_exec import (
     adjust_position,
     all_current_trades_info,

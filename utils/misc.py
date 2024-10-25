@@ -51,3 +51,7 @@ def add_feature_group_col_to_df(
     res = df.copy()
     res[new_col_name] = res[continuous_feature_col_name].apply(get_label_for_group)
     return res
+
+
+def get_forecast_bb(df: pd.DataFrame) -> pd.Series:
+    return df["forecast_bb"]

@@ -7,7 +7,7 @@ import pandas as pd
 from constants import tickers_all
 from utils.atr import add_tr_delta_col_to_ohlc
 from utils.import_data import import_ohlc_daily
-from utils.prepare_df import add_bb_forecast_to_ohlc
+from utils.prepare_df import add_features_v1_basic
 from utils.strategy_exec import process_last_day_res
 
 from .run_backtest_for_ticker import run_backtest_for_ticker
@@ -91,9 +91,9 @@ def run_all_tickers(
         ticker_data = import_ohlc_daily(ticker=ticker)
         ticker_data = add_tr_delta_col_to_ohlc(ticker_data)
 
-        # NOTE customize add_bb_forecast_to_ohlc
+        # NOTE customize add_features_v1_basic
         # to add forecasts and features that you want
-        ticker_data = add_bb_forecast_to_ohlc(df=ticker_data)
+        ticker_data = add_features_v1_basic(df=ticker_data)
 
         # NOTE You can run get_stat_and_trades_for_ticker
         # with some feature (feature_col_name=something) or without it.

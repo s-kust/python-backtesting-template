@@ -10,7 +10,7 @@ from utils.get_df_with_fwd_ret import get_df_with_fwd_ret
 from utils.grouping.bollinger import get_group_label_forecast_bb, group_order_bb
 from utils.local_data import TickersData
 from utils.misc import add_feature_group_col_to_df
-from utils.prepare_df import add_bb_forecast_to_ohlc
+from utils.prepare_df import add_features_v1_basic
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -48,7 +48,7 @@ def analyze_fwd_ret_by_bb_group(
         # add feature to ticker's daily OHLC data
         ohlc_with_forecast_bb_and_fwd_ret = get_df_with_fwd_ret(
             ohlc_df=tickers_data.get_data(ticker=ticker),
-            add_features_forecasts_func=add_bb_forecast_to_ohlc,
+            add_features_forecasts_func=add_features_v1_basic,
             num_days=NUM_DAYS_FWD_RETURN,
         )
 

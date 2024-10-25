@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 
 from constants import LOG_FILE, NUM_DAYS_FWD_RETURN
+from forecast.forecast_bb import add_bb_forecast
 from utils.bootstrap import analyze_values_by_group
 from utils.get_df_with_fwd_ret import get_df_with_fwd_ret
 from utils.local_data import TickersData
@@ -17,6 +18,39 @@ logging.basicConfig(
     encoding="utf-8",
     filemode="a",
 )
+
+
+def _get_bb_cooling_label(row) -> str:
+
+    # check if oversold conditions start improving
+    if (row["forecast_bb_yesterday"]) < -2.4 and (
+        row["forecast_bb_yesterday"] < row["forecast_bb"]
+    ):
+        return "LOW_TO_HIGHER"
+
+    # check if overbought conditions start improving
+    if (row["forecast_bb_yesterday"]) > 2.4 and (
+        row["forecast_bb_yesterday"] > row["forecast_bb"]
+    ):
+        return "HIGH_TO_LOWER"
+
+    # base case
+    return "NOTHING_SPECIAL"
+
+
+def add_bb_cooling_to_ohlc(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add discrete feature bb_cooling,
+    i. e. overbought or oversold conditions start improving.
+    """
+    res = df.copy()
+
+    # We need forecast_bb for this feature
+    res = add_bb_forecast(df=res, col_name="Close")
+    res["forecast_bb_yesterday"] = res["forecast_bb"].shift(1)
+    res["bb_cooling"] = res.apply(_get_bb_cooling_label, axis=1)
+    del res["forecast_bb_yesterday"]
+    return res
 
 
 def analyze_fwd_ret_by_bb_cooling(

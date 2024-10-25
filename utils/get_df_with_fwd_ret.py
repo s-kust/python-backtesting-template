@@ -2,13 +2,13 @@ from typing import Callable
 
 import pandas as pd
 
-from .prepare_df import add_bb_forecast_to_ohlc
+from .prepare_df import add_features_v1_basic
 
 
 def get_df_with_fwd_ret(
     ohlc_df: pd.DataFrame,
     num_days: int = 24,
-    add_features_forecasts_func: Callable = add_bb_forecast_to_ohlc,
+    add_features_forecasts_func: Callable = add_features_v1_basic,
 ) -> pd.DataFrame:
 
     """
