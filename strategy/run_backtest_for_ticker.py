@@ -135,8 +135,10 @@ def run_backtest_for_ticker(
         commission=0.001,
         trade_on_close=False,  # Execute trading signals on today's close price or tomorrow at the open
         exclusive_orders=False,
-        # hedging=False - can't hold long and short position simultaneously,
-        # see also process_max_duration function
+        # NOTE hedging=False - can't hold long and short position simultaneously,
+        # If you set hedging=True, you'll have to improve process_max_duration function,
+        # split it into two separate functions
+        # for max_trade_duration_long and max_trade_duration_short
         hedging=False,
         margin=0.02,
     )
