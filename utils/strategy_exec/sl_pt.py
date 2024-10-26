@@ -53,7 +53,7 @@ def update_stop_losses(strategy: Strategy):
                 setattr(trade, attr, (trade.tag or "") + SL_TIGHTENED)
 
 
-def process_profit_targets_long_trades(strategy: Strategy):
+def check_set_profit_targets_long_trades(strategy: Strategy):
     """
     Set profit target in all long trades where it is None
     """
@@ -79,7 +79,7 @@ def process_profit_targets_long_trades(strategy: Strategy):
                 trade.tp = min_profit_target_long
 
 
-def process_profit_targets_short_trades(strategy: Strategy):
+def check_set_profit_targets_short_trades(strategy: Strategy):
     """
     Set profit target in all short trades where it is None
     """

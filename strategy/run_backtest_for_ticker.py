@@ -10,10 +10,10 @@ from utils.misc import get_forecast_bb
 from utils.strategy_exec import (
     adjust_position,
     all_current_trades_info,
+    check_set_profit_targets_long_trades,
+    check_set_profit_targets_short_trades,
     create_last_day_results,
     log_initial_data_for_today,
-    process_profit_targets_long_trades,
-    process_profit_targets_short_trades,
     process_special_situations,
     update_stop_losses,
 )
@@ -67,9 +67,9 @@ def run_backtest_for_ticker(
             logging.debug("\n")
             update_stop_losses(strategy=self)
             if self.parameters.profit_target_long_pct is not None:
-                process_profit_targets_long_trades(strategy=self)
+                check_set_profit_targets_long_trades(strategy=self)
             if self.parameters.profit_target_short_pct is not None:
-                process_profit_targets_short_trades(strategy=self)
+                check_set_profit_targets_short_trades(strategy=self)
 
             # preparations for 4
             current_position_num_stocks = self.position.size
