@@ -4,7 +4,7 @@ from typing import Callable, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from constants import tickers_all
+from constants import LOG_FILE, tickers_all
 from customizable import StrategyParams, add_features_v1_basic
 from utils.atr import add_tr_delta_col_to_ohlc
 from utils.import_data import import_ohlc_daily
@@ -71,6 +71,9 @@ def run_all_tickers(
     4. Save them to xlsx file.
     5. Return mean value of SQN_modified.
     """
+
+    # clear LOG_FILE every time
+    open(LOG_FILE, "w").close()
 
     performance_res = pd.DataFrame()
     if strategy_params.save_all_trades_in_xlsx:
