@@ -13,7 +13,7 @@ from utils.strategy_exec import process_last_day_res
 from .run_backtest_for_ticker import run_backtest_for_ticker
 
 
-def _add_feature_to_trades(
+def _add_feature_name_to_trades(
     trades: pd.DataFrame, ticker_data: pd.DataFrame, feature_col_name: str
 ) -> pd.DataFrame:
     res = trades.copy()
@@ -44,11 +44,11 @@ def get_stat_and_trades(
 
     # NOTE If feature_col_name is None,
     # return stat and trades without added feature,
-    # otherwise run add_feature_to_trades() and then return
+    # otherwise run _add_feature_name_to_trades() and then return
     if feature_col_name:
         return (
             stat,
-            _add_feature_to_trades(
+            _add_feature_name_to_trades(
                 trades=trades,
                 ticker_data=ohlc_with_feature,
                 feature_col_name=feature_col_name,
