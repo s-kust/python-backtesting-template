@@ -76,18 +76,7 @@ def get_desired_current_position_size(
 
         desired_position_size = current_position_size
 
-        # if (strategy.data.Close[-2] > strategy.data.avwap_year_start[-2]) & (
-        #     strategy.data.Close[-1] > strategy.data.avwap_year_start[-1]
-        # ):
-
-        # if strategy.data.Close[-1] > strategy.data.avwap_min_min[-1]:
-        #     desired_position_size = 0.0
-        # else:
-        #     desired_position_size = current_position_size
-
         return desired_position_size, current_position_size, DPS_STUB
 
     desired_position_size = np.random.random() * 2 - 1
-    # if strategy.data.feature_ys_negative_advanced[-1] == True:
-    #     desired_position_size = -1.0
     return desired_position_size, current_position_size, DPS_STUB
