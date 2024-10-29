@@ -27,3 +27,14 @@ def get_df_with_fwd_ret(
     res[f"ret_{str(num_days)}"] = round(res[f"ret_{str(num_days)}"], 2)
     del res[f"Close_fwd_{str(num_days)}"]
     return res
+
+
+def add_fwd_ret(ohlc_df: pd.DataFrame, num_days: int = 24) -> pd.DataFrame:
+    res = ohlc_df.copy()
+    res[f"Close_fwd_{str(num_days)}"] = res["Close"].shift(-num_days)
+    res[f"fwd_ret_{num_days}"] = (
+        (res[f"Close_fwd_{str(num_days)}"] - res["Close"]) / res["Close"]
+    ) * 100
+    res[f"fwd_ret_{num_days}"] = round(res[f"fwd_ret_{num_days}"], 2)
+    del res[f"Close_fwd_{str(num_days)}"]
+    return res
