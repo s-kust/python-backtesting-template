@@ -1,13 +1,20 @@
 import os
 import sys
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Set
 
 import pandas as pd
 
 from constants import tickers_all
 from customizable import add_features_v1_basic
+from utils.atr import add_tr_delta_col_to_ohlc
 
 from .import_data import get_local_ticker_data_file_name, import_alpha_vantage_daily
+
+MUST_HAVE_DERIVATIVE_COLUMNS: Set[str] = {"tr", "tr_delta"}
+
+# NOTE tr - True Range
+# tr_delta is a must-have column
+# because it is used in update_stop_losses()
 
 
 class TickersData:
@@ -22,7 +29,7 @@ class TickersData:
         add_feature_cols_func: Callable = add_features_v1_basic,
         tickers: List[str] = tickers_all,
         import_ohlc_func: Callable = import_alpha_vantage_daily,
-        required_feature_cols: List[str] = ["forecast_bb"],
+        required_feature_cols: Set[str] = {"forecast_bb"},
     ):
         """
         Save the inputs because we may need them later.
@@ -32,7 +39,8 @@ class TickersData:
         self.tickers_data_with_features: Dict[str, pd.DataFrame] = dict()
         self.add_feature_cols_func = add_feature_cols_func
         self.import_ohlc_func = import_ohlc_func
-        self.required_feature_cols = required_feature_cols
+        self.required_feature_cols: Set[str] = required_feature_cols
+        self.required_feature_cols.update(MUST_HAVE_DERIVATIVE_COLUMNS)
         for ticker in tickers:
             self.tickers_data_with_features[ticker] = self.get_df_with_features(
                 ticker=ticker
@@ -40,9 +48,10 @@ class TickersData:
 
     def _check_all_required_feature_columns_in_df(self, df: pd.DataFrame):
         for col_name in self.required_feature_cols:
-            if col_name not in df.columns:
-                error_msg = f"get_df_with_features: no column {col_name} in DF after calling {self.add_feature_cols_func}"
-                raise ValueError(error_msg)
+            if col_name in df.columns:
+                continue
+            error_msg = f"get_df_with_features: no column {col_name} in DF after calling {self.add_feature_cols_func.__name__}"
+            raise ValueError(error_msg)
 
     def get_df_with_features(self, ticker: str) -> pd.DataFrame:
         """
@@ -68,6 +77,7 @@ class TickersData:
             df = pd.read_excel(filename_with_features, index_col=0)
             for col_name in self.required_feature_cols:
                 if col_name not in df.columns:
+                    df = add_tr_delta_col_to_ohlc(ohlc_df=df)
                     df = self.add_feature_cols_func(df=df)
                     df.to_excel(filename_with_features)
             self._check_all_required_feature_columns_in_df(df=df)
@@ -77,6 +87,7 @@ class TickersData:
         filename_raw = get_local_ticker_data_file_name(ticker=ticker, data_type="raw")
         if os.path.exists(filename_raw) and os.path.getsize(filename_raw) > 0:
             df = pd.read_excel(filename_raw, index_col=0)
+            df = add_tr_delta_col_to_ohlc(ohlc_df=df)
             df = self.add_feature_cols_func(df=df)
             self._check_all_required_feature_columns_in_df(df=df)
             df.to_excel(filename_with_features)
@@ -92,6 +103,7 @@ class TickersData:
             error_msg = f"get_df_with_features: failed call of {self.import_ohlc_func} for {ticker=}, returned {df=}"
             raise RuntimeError(error_msg)
         df.to_excel(filename_raw)
+        df = add_tr_delta_col_to_ohlc(ohlc_df=df)
         df = self.add_feature_cols_func(df=df)
         self._check_all_required_feature_columns_in_df(df=df)
         df.to_excel(filename_with_features)
