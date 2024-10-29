@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # The first step is to collect DataFrames with data and derived columns
     # for all the tickers we are interested in.
     # This data is stored in the TickersData class instance
-    # as a dictionary, whose keys are tickers, and the values ​​are DFs.
+    # as a dictionary whose keys are tickers and the values ​​are DFs.
 
     # For more details, see the class TickersData internals,
     # and the add_features_v1_basic function.

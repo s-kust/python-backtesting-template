@@ -1,12 +1,12 @@
 import logging
 import sys
-from typing import Optional
 
 from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
 from customizable import StrategyParams, add_features_v1_basic
 from strategy import run_all_tickers
+from utils.local_data import TickersData
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -30,17 +30,42 @@ if __name__ == "__main__":
     # See also the internals of the StrategyParams class
 
     strategy_params = StrategyParams(
-        max_trade_duration_long=4,
-        max_trade_duration_short=4,
-        profit_target_long_pct=0.92,
-        profit_target_short_pct=1.912,
-        save_all_trades_in_xlsx=True,
+        max_trade_duration_long=8,
+        max_trade_duration_short=100,
+        profit_target_long_pct=5.5,
+        profit_target_short_pct=17.999,
+        save_all_trades_in_xlsx=False,
+    )
+
+    # NOTE 1.
+    # In the educational example, we take only long positions,
+    # so max_trade_duration_short and profit_target_short_pct parameters
+    # are not meaningful.
+
+    # NOTE 2. The values ​​of the max_trade_duration_long
+    # and profit_target_long_pct parameters
+    # are selected arbitrarily.
+    # See in the run_strategy_main_optimize.py file
+    # how to optimize them.
+
+    # Now we collect DataFrames with data and derived columns
+    # for all the tickers we are interested in.
+    # This data is stored in the TickersData class instance
+    # as a dictionary whose keys are tickers and the values ​​are DFs.
+
+    # For more details, see the class TickersData internals,
+    # and the add_features_v1_basic function.
+    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
+    tickers_data = TickersData(
+        add_feature_cols_func=add_features_v1_basic,
+        tickers=tickers_all,
+        required_feature_cols=required_feature_columns,
     )
 
     SQN_modified_mean = run_all_tickers(
+        tickers_data=tickers_data,
         tickers=tickers_all,
         strategy_params=strategy_params,
-        add_features_func=add_features_v1_basic,
     )
     logging.debug(f"{SQN_modified_mean=}")
     print(f"{SQN_modified_mean=}", file=sys.stderr)

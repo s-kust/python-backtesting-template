@@ -1,12 +1,9 @@
 from typing import Optional, Tuple
 
-import numpy as np
 from backtesting.backtesting import Strategy
 
 from constants import DPS_STUB
 from utils.strategy_exec.misc import get_current_position_size
-
-np.random.seed(47)  # to make results reproducible
 
 
 def get_desired_current_position_size(
@@ -42,11 +39,11 @@ def get_desired_current_position_size(
     last_trade = strategy.closed_trades[-1] if strategy.closed_trades else None
     current_pl = strategy.trades[-1].pl if strategy.trades else None
 
-    # NOTE param_1 and param_1 are fake examples
-    # of some parameters that you may want to optimize.
+    # NOTE param_1 and param_2 are fake examples
+    # of some parameters that you may use
+    # to calculate the desired position size.
     # You can have from zero to a large number of such parameters.
-    # See also the internals of the class StrategyParams
-    # and file optimize_params.py
+    # See also the internals of the class StrategyParams.
 
     # default values
     param_1 = 1.3
@@ -63,20 +60,29 @@ def get_desired_current_position_size(
     ):
         param_2 = strategy.parameters.param_2
 
-    # Below is a stub that you can substitute with your code.
-    # If the current position size is not zero,
-    # stub returns it as the desired position size.
-    # Otherwise, it returns a random float in [-1.0; 1.0]
-    # as the desired position size.
+    # Below is a simplified educational example
+    # that you will substitute with your code.
 
-    # NOTE Don't forget to remove np.random.seed(47)
+    # If the current position size is not zero,
+    # the function returns it as the desired position size.
+    # The settings of the stop losses, take profits,
+    # maximum duration of the trades, and processing of special situations
+    # will take care about the timely closing of the position.
+
+    # If the current position size is zero,
+    # the function may order the system
+    # to take a 100% long position depending on condition.
 
     desired_position_size: Optional[float] = None
+
     if current_position_size != 0:
-
         desired_position_size = current_position_size
-
         return desired_position_size, current_position_size, DPS_STUB
 
-    desired_position_size = np.random.random() * 2 - 1
+    # NOTE see details of feature_advanced
+    # inside the add_features_v1_basic function
+    if strategy._data.feature_advanced[-1] == True:
+        desired_position_size = 1.0
+    # otherwise, it remains None, i.e. signal do nothing
+
     return desired_position_size, current_position_size, DPS_STUB
