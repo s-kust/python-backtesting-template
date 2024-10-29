@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     # For more details, see the class TickersData internals,
     # and the add_features_v1_basic function.
-    required_feature_columns = {"ma_200", "atr_14", "feature"}
+    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
     tickers_data = TickersData(
         tickers=tickers_all,
         add_feature_cols_func=add_features_v1_basic,
@@ -106,12 +106,12 @@ if __name__ == "__main__":
 
     res = dict()
     res["CLOSE_BELOW_MA_200"] = get_bootstrapped_mean_ci(
-        data=combined_ohlc_all[combined_ohlc_all["feature"] == True]["fwd_ret_4"]
+        data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == True]["fwd_ret_4"]
         .dropna()
         .values
     )
     res["CLOSE_ABOVE_MA_200"] = get_bootstrapped_mean_ci(
-        data=combined_ohlc_all[combined_ohlc_all["feature"] == False]["fwd_ret_4"]
+        data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == False]["fwd_ret_4"]
         .dropna()
         .values
     )

@@ -21,8 +21,17 @@ class TickersData:
     """
     This class stores OHLC data for tickers
     locally and delivers it as needed,
-    instead of downloading it from the Internet
+    instead of downloading it from the Internet.
     """
+
+    # NOTE
+    # Practice has shown that it is advisable to maintain raw OHLC data,
+    # as well as data with added derivative columns and features, in separate files.
+    # You'll see the code saves single_raw_XXX.xlsx and single_with_features_XXX.xlsx files.
+    # You will often change derived columns and features.
+    # In such cases, you only need to delete single_with_features_XXX.xlsx files
+    # so that the system creates derivative columns and features again.
+    # And you won't have to request the raw OHLC data from the provider again.
 
     def __init__(
         self,
@@ -32,9 +41,9 @@ class TickersData:
         required_feature_cols: Set[str] = {"forecast_bb"},
     ):
         """
-        Save the inputs because we may need them later.
-        Most importantly, fill self.tickers_data_with_features
+        Fill self.tickers_data_with_features
         to serve the get_data() calls.
+        Also, save the inputs because we may need them later.
         """
         self.tickers_data_with_features: Dict[str, pd.DataFrame] = dict()
         self.add_feature_cols_func = add_feature_cols_func
