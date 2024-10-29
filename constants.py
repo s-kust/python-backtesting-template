@@ -1,6 +1,7 @@
 LOCAL_FOLDER = "/tmp/"
 
-TICKERS_DATA_FILENAMES_PREFIX = "single_"
+TICKER_DATA_RAW_FILENAME_PREFIX = "single_raw_"
+TICKER_DATA_W_FEATURES_FILENAME_PREFIX = "single_with_features_"
 DATA_FILES_EXTENSION = ".xlsx"
 
 TRADE_ALREADY_HALF_CLOSED = "; partially_closed"
@@ -74,8 +75,6 @@ tickers_stocks = [
 ]
 
 
-LOCAL_DAILY_OHLC_RAW_PKL = "ohlc_daily_raw.pkl"
-LOCAL_DAILY_OHLC_WITH_FEATURES_PKL = "ohlc_daily_with_features.pkl"
 LOG_FILE = "app_run.log"
 
 ACTION_BUY = "Buy"

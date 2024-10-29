@@ -6,7 +6,12 @@ import pandas as pd
 import requests
 import yfinance as yf
 
-from constants import DATA_FILES_EXTENSION, LOCAL_FOLDER, TICKERS_DATA_FILENAMES_PREFIX
+from constants import (
+    DATA_FILES_EXTENSION,
+    LOCAL_FOLDER,
+    TICKER_DATA_RAW_FILENAME_PREFIX,
+    TICKER_DATA_W_FEATURES_FILENAME_PREFIX,
+)
 
 ALPHA_VANTAGE_API_KEY = os.environ.get("alpha_vantage_key")
 
@@ -116,8 +121,25 @@ def import_yahoo_daily(
     return res[["Open", "High", "Low", "Close", "Volume"]]
 
 
-def _get_local_ticker_data_file_name(ticker: str) -> str:
-    return LOCAL_FOLDER + TICKERS_DATA_FILENAMES_PREFIX + ticker + DATA_FILES_EXTENSION
+def get_local_ticker_data_file_name(ticker: str, data_type: str = "raw") -> str:
+    internal_ticker = ticker.upper()
+    if data_type == "raw":
+        return (
+            LOCAL_FOLDER
+            + TICKER_DATA_RAW_FILENAME_PREFIX
+            + internal_ticker
+            + DATA_FILES_EXTENSION
+        )
+    if data_type == "with_features":
+        return (
+            LOCAL_FOLDER
+            + TICKER_DATA_W_FEATURES_FILENAME_PREFIX
+            + internal_ticker
+            + DATA_FILES_EXTENSION
+        )
+    raise ValueError(
+        f"get_local_ticker_data_file_name: wrong {data_type=}, should be raw or with_features"
+    )
 
 
 def import_ohlc_daily(
@@ -128,14 +150,14 @@ def import_ohlc_daily(
     If yes, use it. Else, import OHLC data from AV,
     create pd.Df, save it locally and return.
     """
-    internal_ticker = ticker.upper()
-    local_file_path = _get_local_ticker_data_file_name(internal_ticker)
+    local_file_path = get_local_ticker_data_file_name(ticker)
     print(
-        f"import_ohlc_daily - {internal_ticker=}, {local_file_path=}",
+        f"import_ohlc_daily - {ticker=}, {local_file_path=}",
         file=sys.stderr,
     )
     if os.path.exists(local_file_path) and os.path.getsize(local_file_path) > 0:
         return pd.read_excel(local_file_path, index_col=0)
+    internal_ticker = ticker.upper()
     res = import_ohlc_func(ticker=internal_ticker)
     res.index = res.index.tz_localize(None)
     res.to_excel(local_file_path)
