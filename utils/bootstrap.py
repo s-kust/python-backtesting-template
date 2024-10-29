@@ -4,29 +4,30 @@ import numpy as np
 import pandas as pd
 from scipy.stats import bootstrap
 
-from constants import BOOTSTRAP_CONFIDENCE_LEVEL
+from constants import DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL
 
 
 def get_bootstrapped_mean_ci(
-    data: np.typing.NDArray[np.float64], calculate_positive_pct: bool = True
+    data: np.typing.NDArray[np.float64],
+    conf_level: float = DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL,
+    calculate_positive_pct: bool = True,
 ) -> dict:
     """
     Calculate the mean value and determine the left and right boundaries
     of the confidence interval using the bootstrap method.
     """
     data = data[~np.isnan(data)]
-    confidence_level = BOOTSTRAP_CONFIDENCE_LEVEL
     if len(data) <= 3:
         return {
-            f"ci_left_{confidence_level}": np.nan,
+            f"ci_left_{conf_level}": np.nan,
             "mean_val": np.nan,
-            f"ci_right_{confidence_level}": np.nan,
+            f"ci_right_{conf_level}": np.nan,
             "count": data.size,
         }
     mean_ci_left, mean_ci_right = bootstrap(
         (data,),
         np.mean,
-        confidence_level=confidence_level,
+        confidence_level=conf_level,
         n_resamples=1000,
         random_state=1,
         method="percentile",
@@ -36,9 +37,9 @@ def get_bootstrapped_mean_ci(
     if isinstance(mean_ci_right, np.floating):
         mean_ci_right = mean_ci_right.item()
     res = {
-        f"ci_left_{confidence_level}": mean_ci_left,
+        f"ci_left_{conf_level}": mean_ci_left,
         "mean_val": np.mean(data),
-        f"ci_right_{confidence_level}": mean_ci_right,
+        f"ci_right_{conf_level}": mean_ci_right,
         "count": data.size,
     }
     if isinstance(res["mean_val"], np.floating):
@@ -80,8 +81,11 @@ def analyze_values_by_group(
     print(f"analyze_values_by_group: running final all_data...", file=sys.stderr)
     res["all_data"] = get_bootstrapped_mean_ci(data=df[values_col_name].dropna().values)
     df = pd.DataFrame(res).T
+
+    # now sort DF rows according to the group_order_map
     for i, _ in df.iterrows():
         df.loc[i, "order"] = group_order_map[df.loc[i].name]
     df = df.sort_values("order")
     del df["order"]
+
     df.to_excel(excel_file_name)
