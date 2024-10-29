@@ -1,5 +1,6 @@
 import pandas as pd
 
+from features.ma import add_moving_average
 from forecast.forecast_bb import add_bb_forecast
 
 
@@ -16,5 +17,7 @@ def add_features_v1_basic(df: pd.DataFrame) -> pd.DataFrame:
     res = add_bb_forecast(df=res, col_name="Close")
 
     # Customize here
+
+    res = add_moving_average(df=res, n=200)
 
     return res
