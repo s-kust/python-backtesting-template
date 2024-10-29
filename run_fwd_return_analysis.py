@@ -57,6 +57,13 @@ if __name__ == "__main__":
     EXCEL_FILE_NAME_SIMPLE = "res_ma_200_above_below.xlsx"
     GROUP_COL_NAME = "close_rel_ma_200_group"
 
+    # The first step is to collect DataFrames with data and derived columns
+    # for all the tickers we are interested in.
+    # This data is stored in the TickersData class instance
+    # as a dictionary, whose keys are tickers, and the values ​​are DFs.
+
+    # For more details, see the class TickersData internals,
+    # and the add_features_v1_basic function.
     required_feature_columns = {"ma_200", "atr_14", "feature"}
     tickers_data = TickersData(
         tickers=tickers_all,
