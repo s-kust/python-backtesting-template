@@ -59,7 +59,6 @@ if __name__ == "__main__":
         add_feature_cols_func=add_features_v1_basic,
         tickers=tickers_all,
         required_feature_cols=required_feature_columns,
-        recreate_features_every_time=True,
     )
 
     SQN_modified_mean = run_all_tickers(
