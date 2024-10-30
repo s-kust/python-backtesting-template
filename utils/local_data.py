@@ -39,6 +39,7 @@ class TickersData:
         tickers: List[str] = tickers_all,
         import_ohlc_func: Callable = import_alpha_vantage_daily,
         required_feature_cols: Set[str] = {"forecast_bb"},
+        recreate_features_every_time: bool = False,
     ):
         """
         Fill self.tickers_data_with_features
@@ -50,6 +51,7 @@ class TickersData:
         self.import_ohlc_func = import_ohlc_func
         self.required_feature_cols: Set[str] = required_feature_cols
         self.required_feature_cols.update(MUST_HAVE_DERIVATIVE_COLUMNS)
+        self.recreate_features_every_time = recreate_features_every_time
         for ticker in tickers:
             self.tickers_data_with_features[ticker] = self.get_df_with_features(
                 ticker=ticker
@@ -76,22 +78,33 @@ class TickersData:
         Check the result. Save local XLSX files with raw data
         and with added features. Return DataFrame.
         """
-        filename_with_features = get_local_ticker_data_file_name(
-            ticker=ticker, data_type="with_features"
-        )
-        if (
-            os.path.exists(filename_with_features)
-            and os.path.getsize(filename_with_features) > 0
-        ):
-            df = pd.read_excel(filename_with_features, index_col=0)
-            for col_name in self.required_feature_cols:
-                if col_name not in df.columns:
-                    df = add_tr_delta_col_to_ohlc(ohlc_df=df)
-                    df = self.add_feature_cols_func(df=df)
-                    df.to_excel(filename_with_features)
-            self._check_all_required_feature_columns_in_df(df=df)
-            print(f"Reading {filename_with_features} - OK")
-            return df
+
+        # if self.recreate_features_every_time is True -
+        # don't use locally cached feature columns,
+        # recreate them every time.
+        # This is needed for cases when the add_feature_cols_func function
+        # is called with different parameters,
+        # in order to optimize these parameters.
+        # See also the run_strategy_main_optimize.py file.
+        if not self.recreate_features_every_time:
+            # try to read feature columns from local cache files
+            #  instead of recalculating them
+            filename_with_features = get_local_ticker_data_file_name(
+                ticker=ticker, data_type="with_features"
+            )
+            if (
+                os.path.exists(filename_with_features)
+                and os.path.getsize(filename_with_features) > 0
+            ):
+                df = pd.read_excel(filename_with_features, index_col=0)
+                for col_name in self.required_feature_cols:
+                    if col_name not in df.columns:
+                        df = add_tr_delta_col_to_ohlc(ohlc_df=df)
+                        df = self.add_feature_cols_func(df=df)
+                        df.to_excel(filename_with_features)
+                self._check_all_required_feature_columns_in_df(df=df)
+                print(f"Reading {filename_with_features} - OK")
+                return df
 
         filename_raw = get_local_ticker_data_file_name(ticker=ticker, data_type="raw")
         if os.path.exists(filename_raw) and os.path.getsize(filename_raw) > 0:
@@ -99,7 +112,11 @@ class TickersData:
             df = add_tr_delta_col_to_ohlc(ohlc_df=df)
             df = self.add_feature_cols_func(df=df)
             self._check_all_required_feature_columns_in_df(df=df)
-            df.to_excel(filename_with_features)
+
+            # save cache files only if they will be used later
+            if not self.recreate_features_every_time:
+                df.to_excel(filename_with_features)
+
             print(f"Reading {filename_raw} - OK")
             return df
 
