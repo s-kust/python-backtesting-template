@@ -142,23 +142,4 @@ def get_local_ticker_data_file_name(ticker: str, data_type: str = "raw") -> str:
     )
 
 
-def import_ohlc_daily(
-    ticker: str, import_ohlc_func: Callable = import_alpha_vantage_daily
-) -> pd.DataFrame:
-    """
-    Check if local file with ticker data exists in /tmp/ folder.
-    If yes, use it. Else, import OHLC data from AV,
-    create pd.Df, save it locally and return.
-    """
-    local_file_path = get_local_ticker_data_file_name(ticker)
-    print(
-        f"import_ohlc_daily - {ticker=}, {local_file_path=}",
-        file=sys.stderr,
-    )
-    if os.path.exists(local_file_path) and os.path.getsize(local_file_path) > 0:
-        return pd.read_excel(local_file_path, index_col=0)
-    internal_ticker = ticker.upper()
-    res = import_ohlc_func(ticker=internal_ticker)
-    res.index = res.index.tz_localize(None)
-    res.to_excel(local_file_path)
-    return pd.read_excel(local_file_path, index_col=0)
+
