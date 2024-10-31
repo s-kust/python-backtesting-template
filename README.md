@@ -190,53 +190,7 @@ First, successfully run backtests for your set of tickers using one set of param
 
 It's a good sign when the charts of backtest results depending on parameter values resemble Gaussian curves. Little deviations from the optimal parameter values should ​​only cause slight deterioration in backtest results. If the backtest results fluctuate wildly and chaotically, something went wrong.
 
-# Analyzing Close-Close Returns
-
-This repository could assist you in analyzing the likely direction of stock prices over the next few days. Some days, you can predict it with a fair amount of confidence based on today's value of some features. These features may be discrete or continuous. The script `run_analysis.py` demonstrates how to do it. It runs the functions that are in the `analysis/fwd_returns` folder.
-
-## Discrete Feature Example
-
-As a tutorial example of using a discrete feature, see `bb_cooling`. It is a rudimentary indicator suggesting that overbought or oversold conditions are beginning to stabilize. See details in the function `add_bb_cooling_to_ohlc`. It adds this feature as a column to the OHLC data.
-
-The `analyze_fwd_ret_by_bb_cooling` function performs the analysis and saves the results in an Excel file. The `run_analysis.py` script calls this function for stocks, precious metals, and commodities.
-
-![Analyzing commodities prices](./img/bb_cooling_cmd.PNG)
-
-Getting long commodities when oversold conditions stabilize (`LOW_TO_HIGHER` group) could be a promising strategy. 
-
-Theoretically, taking a short position in commodities when market excitement starts to cool should be profitable. This situation is indicated by stabilizing overbought conditions, the `HIGH_TO_LOWER` group. However, the current version of the `bb_cooling` feature does not support this assumption. 
-
-Please note that the `bb_cooling` feature is rudimentary. You would better not use it for real-world trading without substantial enhancements.
-
-## Continuous Feature Example
-
-The `add_bb_forecast` function adds a `forecast_bb` column to the data. This column serves as a rudimentary trend strength indicator. Typically, folks plot Bollinger Bands where the absolute value of this indicator exceeds 2.0 or 2.2. A price crossing above the upper Bollinger Band signals overbought conditions. Also, a price crossing below the lower Bollinger Band signals oversold conditions.
-
-The `analyze_fwd_ret_by_bb_group` function demonstrates the analysis of the continuous feature `forecast_bb`. Initially, it adds a new column to the data, labeling each row according to the group the current `forecast_bb` value falls into. The function `add_feature_group_col_to_df` is responsible for it. This function has some intricacies worth examining closely. 
-
-You can easily customize the splitting of continuous features into groups and the ordering of those groups. For each feature value, the feature's custom function `get_group_label_XXX` returns its label. The new column `new_col_name` stores this label.
-
-After adding group labels, the main function `analyze_fwd_ret_by_bb_group` calls `analyze_values_by_group` function to calculate average returns over the next few days for each group, along with their confidence interval. The results for all groups are then saved to an Excel file in a format that is easy to review and compare.
-
-In addition to splitting into groups and analyzing these groups, you can perform a linear regression of the `ret_{NUM_DAYS_FWD_RETURN}` column against the continuous feature column. Information on how to conduct a linear regression and interpret its results is readily available elsewhere.
-
 # A Real-Life Example
-
-I hope you find the example below helpful and inspiring. To do something similar, use the `run_strategy_main.py` or `optimize_params.py` file.
-
-I recently tested a feature represented in the OHLC DataFrame as a Boolean column. When its value was occasionally True, it signaled the system to open a short position. The system would hold this position until either the `max_trade_duration_short` expired or some special situation triggered an earlier closure. Also, there are certain conditions where it may be wise to close the position early, even if no special situation has been triggered and the `max_trade_duration_short` has not yet expired.
-
-The primary task was to test various values of the `max_trade_duration_short` variable. Regarding special situations, I determined that `take_profit` and `volatility_spike` were irrelevant for this feature, so I commented them out in the `process_special_situations` function. 
-
-To test the custom conditions for closing a position early, I created and ran two variations of the `get_desired_current_position_size` function, referred to as **position_size - V1** and **V2** in the table below. Alternatively, I could test these conditions by adding a custom special situation.
-
-In addition to testing different `max_trade_duration_short` values and custom conditions for early position closing, I also evaluated whether the system should handle the `hammer` and `partial_close` special situations. I have easily accomplished this by commenting out specific sections of the `process_special_situations` function code.
-
-For each variation of the parameters mentioned above, the system conducted backtests on 11 different stock and ETF tickers. The resulting data shows the average `SQN_modified` value across all tickers. The table below presents these results partially.
-
-![Trading strategy backtesting results](./img/real_life_1.PNG)
-
-The longer the system keeps short positions open, the more volatile the results become. It leads to a decrease in the average `SQN_modified` value. The other parameters have little impact on the outcome. However, it looks beneficial to handle the `hammer` and `partial_close` special situations and to use the `get_desired_current_position_size V1` function.
 
 # Conclusion
 
