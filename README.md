@@ -25,6 +25,10 @@ Just like with the original Python `backtesting` package, you can obtain and use
 
 10. You can easily optimize every parameter of your trading strategy, including stop-losses, profit targets, maximum trade duration, and more. For detailed instructions on this, see below. The file `run_strategy_main_optimize.py` provides a working example. 
 
+You create value by developing trading signals and rules for calculating the desired position size. This repository allows you to focus on these tasks while minimizing the time and effort spent on miscellaneous concomitant problems. 
+
+Although everything written below may seem complicated, you will quickly understand it after reviewing the examples in the specified folders and files.
+
 # Suggested Workflow
 
 Let's assume you have a trading signal in mind and want to test whether it is worthwhile for real-world trading.
@@ -45,7 +49,7 @@ It includes the following steps:
 
 2. List the parameters your trading strategy will require within the `StrategyParams` class. 
 
-3. Define the rules for calculating the desired daily position size and code them within the `get_desired_current_position_size` function.
+3. Define the rules for calculating the desired position size and code them within the `get_desired_current_position_size` function.
 
 4. Review the code of the `process_special_situations` function. You might want to comment out certain special situations, add your own, or change the order in which the system processes them.
 
@@ -69,7 +73,17 @@ Here’s what happens inside this function in the `run_backtest_for_ticker.py` f
 3. If no special situations are found, calculate the desired position size. If it differs significantly from the current size, buy or sell shares.
 4. If today is the last day in the data, the system calls the `create_last_day_results` function, which populates and returns the `last_day_result` dictionary.
 
-The system calls the `get_desired_current_position_size` function to determine the current and desired position sizes. If the desired position size is 0, the system closes all open trades. If it's `None`, no calculation of the difference between the current and desired position sizes is needed, and no buy or sell orders are placed with the broker.
+## Calculating Desired Position Size and Processing Results
+
+The system calls the `get_desired_current_position_size` function to determine the current and desired position sizes. 
+
+If the resulting desired position size is 0, the system closes all open trades. 
+
+If it is `None`, no buy or sell orders are placed with the broker.
+
+Otherwise, the system calculates the difference between the current and desired position size. If this difference is too large, an order is created to buy or sell the corresponding number of shares.
+
+## Tracking Real-Time Trading Signals in Data
 
 After the finish of the backtest, the `get_stat_and_trades_for_ticker` function returns the `last_day_result` dictionary together with other results. This dictionary is then passed to the `process_last_day_res` function. This function is intended to send you notifications when specific conditions are met. However, it has not been implemented yet. 
 
@@ -91,21 +105,21 @@ The system saves local copies of data in Excel files. It stores “raw” data a
 
 Template for naming a file with raw data: `single_raw_TICKER.xlsx`. Template for naming a file with data and added columns: `single_with_features_TICKER.xlsx`. 
 
-All these files are stored in the `\tmp\` folder by default. You can easily change this destination folder and naming templates in the `constants.py` file.
+All these files are stored in the `\tmp\` folder by default. You can easily change the destination folder and naming templates in the `constants.py` file.
 
 ![local cache files](./img/local_cache_files.PNG)
 
 The class `TickersData` carries the work with Excel cache files. This class is described in detail below.
 
-# Centralized Data Repository: One Source for All Tasks
+# Centralized OHLC Data Repository
 
 The `TickersData` class performs the following tasks:
-1. It retrieves daily OHLC data for each ticker from an external provider.
+1. It retrieves "raw" daily OHLC data for each ticker from an external provider.
 2. It calls the function you created in the `\customizable\add_features.py` file to add derived columns and features.
-3. It generates a dictionary with tickers as keys and Pandas DataFrames as values.
+3. It generates and stores a dictionary with tickers as keys and Pandas DataFrames as values.
 4. It saves local Excel cache files, as described above.
 
-If the class instance finds existing local `.xlsx` cache files, it reads that data instead of making requests to the external provider. If you want it to retrieve fresh "raw" OHLC data from the provider, delete the `single_raw_TICKER.xlsx` cache files manually.
+If the class instance finds existing local `.xlsx` cache files, it reads that data instead of making requests to the external provider. If you want it to retrieve fresh OHLC data from the provider, delete the `single_raw_TICKER.xlsx` cache files manually.
 
 An instance of the `TickersData` class acts as a centralized repository for OHLC data. All functions that require OHLC data use this instance to operate. 
 
@@ -119,7 +133,9 @@ def run_all_tickers(
 ) -> float:
 ```
 
-The class includes a `get_data` function that returns a ticker's DataFrame. It contains OHLC data, derived columns, and features. Take a couple of minutes to examine its code.
+The class includes a `get_data` function that returns a ticker's DataFrame. It contains OHLC data, derived columns, and features. Take a couple of minutes to examine its code. 
+
+See also `run_strategy_main_simple.py` file for how to instantiate the `TickersData` class. Note the `required_feature_columns` parameter. It is a set where you should list all derived columns and features.
 
 ## Optimizing Input Parameters for Feature Creation Functions
 
@@ -129,6 +145,8 @@ First, use `functools.partial` as demonstrated in the file. Then, when creating 
 
 # Output.xlsx File Overview and Explanations
 
+The `run_all_tickers` function creates and saves the `output.xlsx` file at the end of its execution. However, this only occurs if the number of tickers exceeds one.
+
 Your `output.xlsx`file may look like the following:
 ![Python backtesting output file](./img/output.PNG)
 
@@ -136,15 +154,9 @@ If you are a trader, you probably understand the meaning of its rows. The only r
 
 System Quality Number (SQN) is a popular indicator of the trading system's quality developed by Dr. Van Tharp. Its classic formula has a drawback: it tends to produce overly optimistic results when analyzing more than 100 trades, particularly when the number of trades exceeds 150-200. 
 
-`SQN_modified` is devoid of this drawback. It is simply the average of trade profits divided by the standard deviation of profits. A trading system is considered not bad if its `SQN_modified` has a positive value of at least 0.1. Systems whose `SQN_modified` value exceeds 0.2 are deemed decent or even good. By looking through the `output.xlsx` file, you can easily calculate the average  `SQN_modified` for all tickers.
+`SQN_modified` is devoid of this drawback. It is simply the average of trade profits divided by the standard deviation of profits. A trading system is considered not bad if its `SQN_modified` has a positive value of at least 0.1. Systems whose `SQN_modified` value exceeds 0.2 are deemed decent or even good. 
 
-# Implementing Your Custom Features
-
-The purpose of this repository, like the original `backtesting` package, is to test the effectiveness of your custom features as trading signals. When we talk about creating features, we refer to adding one or more columns to the OHLC data based on rules. You can store functions that accomplish this in the `features` folder.
-
-You also need a function that calls the feature-creation functions. Pass this function as the `add_features_forecasts_func` parameter to the `get_stat_and_trades_for_ticker` function. It is advisable to place this function in the `utils/prepare_df.py` file to avoid confusion.
-
-Although everything written above may seem complicated, you will quickly understand it after reviewing the examples in the specified folders and files.
+By looking through the `output.xlsx` file, you can easily calculate the average `SQN_modified` for all tickers. Or simply use the result that the `run_all_tickers` function returns.
 
 # Managing Special Situations
 
