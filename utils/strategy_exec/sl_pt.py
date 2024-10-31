@@ -13,7 +13,7 @@ def _get_n_atr(strategy: Strategy) -> float:
     Get ATR multiplier for stop-loss calculation.
     If volatility is high (tr_delta high)
     and current trade is profitable, tighten the stop-loss,
-    i.e lower ATR multiplier.
+    i.e lower ATR multiplier to 1.1.
     """
     index = len(strategy.data) - 1
     if (
@@ -27,7 +27,14 @@ def _get_n_atr(strategy: Strategy) -> float:
 
 def update_stop_losses(strategy: Strategy):
     """
-    Update stop-losses in all open trades
+    Update trailing stop-losses in all open trades. 
+    This function is called daily by the next() function of your strategy.
+    In normal situations, trailing stop-loss is equal 
+    to Average True Range 50 multiplied by 2.5 
+    (strategy.parameters.stop_loss_default_atr_multiplier). 
+    If volatility spike is detected (tr_delta > 1.98), 
+    the stop-loss is tightened, 
+    i.e. the multiplier is reduced from 2.5 to 1.1.
     """
     if strategy.trades is None:
         return
@@ -58,6 +65,13 @@ def check_set_profit_targets_long_trades(strategy: Strategy):
     Set profit target in all long trades where it is None
     """
 
+    # NOTE 
+    # This function uses strategy.parameters.profit_target_long_pct. 
+    # Call this function only after you have made sure 
+    # that strategy.parameters.profit_target_long_pct is not None. 
+    # See in the run_backtest_for_ticker.py file 
+    # how it is done inside the next() function of the strategy.
+
     last_price = strategy._data.Open[-1]
     min_profit_target_long: Optional[float] = None
     trades_long = [trade for trade in strategy.trades if trade.is_long]
@@ -83,6 +97,13 @@ def check_set_profit_targets_short_trades(strategy: Strategy):
     """
     Set profit target in all short trades where it is None
     """
+
+    # NOTE 
+    # This function uses strategy.parameters.profit_target_short_pct. 
+    # Call this function only after you have made sure 
+    # that strategy.parameters.profit_target_short_pct is not None. 
+    # See in the run_backtest_for_ticker.py file 
+    # how it is done inside the next() function of the strategy.
 
     last_price = strategy._data.Open[-1]
     max_profit_target_short: Optional[float] = None

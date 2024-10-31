@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional, Tuple
+from typing import Tuple
 
 import pandas as pd
 from backtesting import Backtest, Strategy
