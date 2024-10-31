@@ -107,7 +107,19 @@ The `TickersData` class performs the following tasks:
 
 If the class instance finds existing local `.xlsx` cache files, it reads that data instead of making requests to the external provider. If you want it to retrieve fresh "raw" OHLC data from the provider, delete the `single_raw_TICKER.xlsx` cache files manually.
 
-An instance of the `TickersData` class acts as a centralized repository for OHLC data. All functions that require OHLC data use this instance to operate. The class includes a `get_data` function that returns a ticker's DataFrame. It contains OHLC data, derived columns, and features. Take a couple of minutes to examine its code.
+An instance of the `TickersData` class acts as a centralized repository for OHLC data. All functions that require OHLC data use this instance to operate. 
+
+For example,
+
+``` python
+def run_all_tickers(
+    tickers_data: TickersData,
+    strategy_params: StrategyParams,
+    tickers: List[str] = tickers_all,
+) -> float:
+```
+
+The class includes a `get_data` function that returns a ticker's DataFrame. It contains OHLC data, derived columns, and features. Take a couple of minutes to examine its code.
 
 ## Optimizing Input Parameters for Feature Creation Functions
 
