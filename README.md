@@ -166,7 +166,7 @@ You can access the most recent trade using this code: `last_trade = strategy.clo
 
 You can parse the tag of the last trade and take different actions based on its content. For example, when some special situation is detected, it may be wise to wait a few days before opening new long or short positions.
 
-You can specify which special situations to check and their order within the `process_special_situations` function. Additionally, you can add your custom special situations to the `utils/special_situations.py` file. The profitability of trades largely depends on the rules you establish for handling special situations.
+You can specify which special situations to check and their order within the `process_special_situations` function. Additionally, you can add your custom special situations to the `utils/strategy_exec/special_situations.py` file. The profitability of trades largely depends on the rules you establish for handling special situations.
 
 ## Understanding the Partial Close Special Situation
 
@@ -178,13 +178,17 @@ Take the time to study the `process_partial_close` and `_process_partial_close` 
 
 # Optimization of Strategy Parameters
 
-You can determine the best values for one or more numerical parameters in your trading strategy. These are the parameters the `get_desired_current_position_size` function uses to calculate the desired position size.
+The `StrategyParams` class should contain all the parameters of your trading strategy. All essential functions have access to these parameters, including:
+- `get_desired_current_position_size` 
+- `process_special_situations`
+- `update_stop_losses`
+- function that created derived columns and features
 
-A script `optimize_params.py` can help you in finding the optimal parameter values. After it runs, you'll have a file `parameter_values.xlsx` with the results. It will look like this.
+First, successfully run backtests for your set of tickers using one set of parameters. The `run_strategy_main_simple.py` file will assist you with this. Afterward, you can optimize the parameters of your trading strategy. The `run_strategy_main_optimize.py` file should help you with this. After it runs, you'll have a file `optimization_results.xlsx` with the results. It will look like this.
 
 ![trading strategy parameters optimization results](./img/optimization_res.PNG)
 
-It's a good sign when the charts of backtest results depending on parameter values resemble Gaussian curves. Little deviations from the optimal parameter value should ​​only cause slight deterioration in backtest results. If the backtest results fluctuate wildly and chaotically, something went wrong.
+It's a good sign when the charts of backtest results depending on parameter values resemble Gaussian curves. Little deviations from the optimal parameter values should ​​only cause slight deterioration in backtest results. If the backtest results fluctuate wildly and chaotically, something went wrong.
 
 # Analyzing Close-Close Returns
 
