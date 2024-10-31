@@ -93,7 +93,27 @@ Template for naming a file with raw data: `single_raw_TICKER.xlsx`. Template for
 
 All these files are stored in the `\tmp\` folder by default. You can easily change this destination folder and naming templates in the `constants.py` file.
 
+![local cache files](./img/local_cache_files.PNG)
+
 The class `TickersData` carries the work with Excel cache files. This class is described in detail below.
+
+# Centralized Data Repository: One Source for All Tasks
+
+The `TickersData` class performs the following tasks:
+1. It retrieves daily OHLC data for each ticker from an external provider.
+2. It calls the function you created in the `\customizable\add_features.py` file to add derived columns and features.
+3. It generates a dictionary with tickers as keys and Pandas DataFrames as values.
+4. It saves local Excel cache files, as described above.
+
+If the class instance finds existing local `.xlsx` cache files, it reads that data instead of making requests to the external provider. If you want it to retrieve fresh "raw" OHLC data from the provider, delete the cache files manually.
+
+An instance of the `TickersData` class acts as a centralized repository for OHLC data. All functions that require OHLC data use this instance to operate.
+
+## Optimizing Input Parameters for Feature Creation Functions
+
+Your function for creating derived columns and features will likely have some input parameters. You may want to optimize them. The `run_strategy_main_optimize.py` file demonstrates how to do it.
+
+First, use `functools.partial` as demonstrated in the file. Then, when creating an instance of the `TickersData` class, be sure to set `recreate_features_every_time=True`. If you don't, the code will read data from the local `single_with_features_TICKER.xlsx` cache files instead of calling your function with a new set of parameters each time.
 
 # Output.xlsx File Overview and Explanations
 
