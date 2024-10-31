@@ -162,7 +162,7 @@ By looking through the `output.xlsx` file, you can easily calculate the average 
 
 Special situations include scenarios such as the maximum trade duration expiring, a volatility spike occurring, or the discovery of a bullish or bearish candle. If the system detects at least one of these situations, it should close the position immediately.
 
-You can access the most recent trade using this code: `last_trade = strategy.closed_trades[-1]`. Each trade has a `tag` parameter. When the system detects a special situation, it adds a tag to all trades before closing them, allowing you to identify the context later. The `add_tag_to_trades_and_close_position` function handles this task. For examples of its use, refer to the `utils/special_situations.py` file.
+You can access the most recent trade using this code: `last_trade = strategy.closed_trades[-1]`. Each trade has a `tag` parameter. When the system detects a special situation, it adds a tag to all trades before closing them, allowing you to identify the context later. The `add_tag_to_trades_and_close_position` function handles this task. For examples of its use, refer to the `utils/strategy_exec/special_situations.py` file.
 
 You can parse the tag of the last trade and take different actions based on its content. For example, when some special situation is detected, it may be wise to wait a few days before opening new long or short positions.
 
@@ -191,6 +191,18 @@ First, successfully run backtests for your set of tickers using one set of param
 It's a good sign when the charts of backtest results depending on parameter values resemble Gaussian curves. Little deviations from the optimal parameter values should ​​only cause slight deterioration in backtest results. If the backtest results fluctuate wildly and chaotically, something went wrong.
 
 # A Real-Life Example
+
+This repository contains a real-world study of the 200-day simple moving average (`ma_200`). 
+
+There are two common opinions among traders: 
+
+- nothing good happens below the 200-day moving average
+
+- buy the dip, don't wait for the price to go up
+
+They can't both be true.
+
+
 
 # Conclusion
 
