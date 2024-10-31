@@ -57,6 +57,8 @@ After completing the steps above, run backtests on the tickers you are intereste
 
 Once you've conducted the backtests and reviewed the `output.xlsx` file, attempt to optimize your strategy parameters. The code and explanations in the `run_strategy_main_optimize.py` file will assist you in this process.
 
+Please note that the file `output.xlsx` is created only if the number of tickers is more than one.
+
 # How Backtests Run
 
 Like the original `backtesting` package, most work happens within the `next` function of the `Strategy` you create. The system calls this function each day of your OHLC data, starting from the first day. 
@@ -92,29 +94,6 @@ Template for naming a file with raw data: `single_raw_TICKER.xlsx`. Template for
 All these files are stored in the `\tmp\` folder by default. You can easily change this destination folder and naming templates in the `constants.py` file.
 
 The class `TickersData` carries the work with Excel cache files. This class is described in detail below.
-
-# Quick Start
-
-The system currently uses [Alpha Vantage](https://www.alphavantage.co/) as its main source of OHLC data. If you want to change it, modify the `import_ohlc_daily` function. 
-
-First of all, you need to register on the Alpha Vantage site to receive a free API key. Write this key to your environment variables. At the start of the run, the system will retrieve it `ALPHA_VANTAGE_API_KEY = os.environ.get("alpha_vantage_key")` and use it. 
-
-To avoid requesting data from Alpha Vantage every time, the system saves copies of the data as Excel files in the `/tmp/` folder. For example, `single_SPY.xlsx`. To make the system access Alpha Vantage again, you need to manually delete these files. You can modify the destination folder in the `constants.py` file.
-
-Once you have received the API key from Alpha Vantage and given the system access to it, follow these steps.
-
-1. Create some forecast in the `forecast` folder. See `forecast_bb.py` file for example.
-2. Add its `get_forecast_***` function to the `utils/prepare_df.py` file.
-3. Specify your forecast in the `init` function of the trading strategy in `strategy/run_backtest_for_ticker.py` file.
-4. Code the rules for determining the desired position size in the `get_desired_current_position_size` function in `get_position_size_main.py` file.
-5. Review and, if desired, change the `tickers_all` list in the `constants.py` file.
-6. Run the `run_strategy_main.py` file. When the script finishes running, view the `output.xlsx` file, as well as logs in the `app_run.log` file.
-
-Note 1. The file `output.xlsx` is created only if the number of tickers is more than one.
-
-Note 2. If you wish, you can use several different forecasts at the same time, as well as additional features for filtering trades. In real life, you will most likely do so.
-
-Invention of forecasts and rules for determining the desired position size are the steps where you create value.
 
 # Output.xlsx File Overview and Explanations
 
