@@ -45,7 +45,7 @@ def add_features_v1_basic(
 
     MOVING_AVERAGE_N = 200
 
-    # add ma_200 columns
+    # add ma_200 column
     res = add_moving_average(df=res, n=MOVING_AVERAGE_N)
 
     res["atr_14"] = res["tr"].rolling(14).mean()

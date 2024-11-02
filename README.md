@@ -196,11 +196,26 @@ This repository contains a real-world study of the 200-day simple moving average
 
 There are two common opinions among traders: 
 
-- nothing good happens below the 200-day moving average
+- Nothing good ever happens below the 200-day moving average.
 
-- buy the dip, don't wait for the price to go up
+- Buy the dip!
 
-They can't both be true.
+They can't both be true. 
+
+The file `customizable/add_features.py` contains a function called `add_features_v1_basic` intended to serve as an example and source of inspiration. This function includes the following code snippet, which adds a 200-day moving average and a 14-day Average True Range (ATR).
+
+``` python
+MOVING_AVERAGE_N = 200
+# add ma_200 column
+res = add_moving_average(df=res, n=MOVING_AVERAGE_N)
+res["atr_14"] = res["tr"].rolling(14).mean()
+``` 
+
+Next, a simple Boolean feature is created based on the 200-day moving average.
+
+``` python
+res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
+``` 
 
 
 
