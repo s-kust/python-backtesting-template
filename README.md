@@ -416,6 +416,82 @@ To complete the setup, call the `run_all_tickers` function, providing it with th
 
 If the code executes smoothly, it will create the output.xlsx file, allowing you to review its contents.
 
+## Optimizing Parameter Values
+
+In this simplified tutorial example, we take only long trades, so we have just a few key parameters to optimize:
+
+- Maximum duration of long trades `max_trade_duration_long`
+
+- Profit target for long trades (expressed in percentages) `profit_target_long_pct`
+
+- Average True Range (ATR, `atr_14`) multiplier `atr_multiplier_threshold`
+
+Be particularly mindful of the `atr_multiplier_threshold` parameter. This parameter serves as an input for the function that generates derived columns and features. Unlike other parameters, it is not present among the fields of the `StrategyParams` class. It requires special handling, which is outlined below.
+
+Now, let’s examine the `run_strategy_main_optimize.py` file. In this file, the creation of instances for the `StrategyParams` and `TickersData` classes, along with the execution of the `run_all_tickers` function, has been moved to a standalone function, `run_all_tickers_with_parameters`. This function accepts the strategy parameter values as inputs and returns `SQN_modified_mean`.
+
+In the main section of the file, start by defining the parameter value ranges you'd like to test.
+
+``` python 
+# Here you list the parameters you want to optimize, as well as their value ranges.
+# The parameters must be a subset of the StrategyParams class fields.
+# These same parameters must be used
+# when calling the run_all_tickers_with_parameters() function.
+max_trade_duration_long_vals = range(9, 11)
+profit_target_long_pct_vals = [x / 10.0 for x in range(25, 45, 10)]
+atr_multiplier_threshold_vals = range(6, 8)
+
+combinations = itertools.product(
+    max_trade_duration_long_vals,
+    profit_target_long_pct_vals,
+    atr_multiplier_threshold_vals,
+)
+total_count = sum(1 for x in combinations)
+
+# NOTE this reload is mandatory,
+# because the iterator was consumed
+# when determined the total_count
+combinations = itertools.product(
+    max_trade_duration_long_vals,
+    profit_target_long_pct_vals,
+    atr_multiplier_threshold_vals,
+)
+```
+
+Next, execute `run_all_tickers_with_parameters` for each combination of parameter values, storing the results after each run.
+
+``` python 
+counter = 0
+for item in combinations:
+    counter = counter + 1
+    print(f"Running combination {counter} of {total_count}...")
+    max_trade_duration_long = item[0]
+    profit_target_long_pct = item[1]
+    atr_multiplier_threshold = item[2]
+    SQN_modified_mean = run_all_tickers_with_parameters(
+        max_trade_duration_long=max_trade_duration_long,
+        profit_target_long_pct=profit_target_long_pct,
+        atr_multiplier_threshold=atr_multiplier_threshold,
+        save_all_trades_in_xlsx=False,
+    )
+    result = {
+        "max_duration_long": max_trade_duration_long,
+        "profit_tgt_lg_pct": profit_target_long_pct,
+        "atr_multiplier": atr_multiplier_threshold,
+        "SQN_m_mean": SQN_modified_mean,
+    }
+    all_results.append(result)
+    # save to Excel file every time in case the script execution is interrupted.
+    # The next time you run it, you won't have to process the same parameter sets again.
+    pd.DataFrame.from_records(all_results).to_excel(EXCEL_FILE_NAME, index=False)
+```
+
+Result:
+
+![Trading strategy parameters optimization results](./img/optimization_res_real.PNG)
+
+All `SQN_modified_mean` values are negative, indicating that the average trade profitability is below zero once broker commissions and spreads are accounted for. It isn’t unexpected, as the trading signal relies on a simplified feature. In real-world trading, achieving profitability requires a more advanced approach.
+
 # Conclusion
 
 This repository contains a substantial amount of Python code. Unfortunately, its structure is quite complex. Due to limitations in the original `backtesting` package, simplifying it isn't feasible. Learning the available features and understanding the code's intricacies will take time and effort, but I believe it will be a worthwhile investment for you.
