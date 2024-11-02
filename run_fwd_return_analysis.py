@@ -50,7 +50,12 @@ if __name__ == "__main__":
     for ticker in tickers_data.tickers_data_with_features:
         df = tickers_data.tickers_data_with_features[ticker]
         df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
+        
+        # NOTE 
+        # You must still create combined_ohlc_all, 
+        # even if you don't plan to split the data into groups.
         combined_ohlc_all = pd.concat([combined_ohlc_all, df])
+    
     combined_ohlc_all = combined_ohlc_all.dropna()
 
     # just in case...

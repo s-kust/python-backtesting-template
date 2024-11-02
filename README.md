@@ -275,6 +275,8 @@ for ticker in tickers_data.tickers_data_with_features:
 
 For details, see the internals of the `add_fwd_ret` function.
 
+Now we apply the `get_ma_200_relation_label` function to each OHLC row and create a big combined DataFrame. 
+
 ``` python    
     # Add a column with a group label
     # and concatenate the DFs of all tickers into one large DF.
@@ -282,9 +284,35 @@ For details, see the internals of the `add_fwd_ret` function.
     for ticker in tickers_data.tickers_data_with_features:
         df = tickers_data.tickers_data_with_features[ticker]
         df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
+        
+        # NOTE 
+        # You must still create combined_ohlc_all, 
+        # even if you don't plan to split the data into groups.
         combined_ohlc_all = pd.concat([combined_ohlc_all, df])
+    
     combined_ohlc_all = combined_ohlc_all.dropna()
 ```
+
+The following code performs a basic analysis.
+
+``` python    
+       res = dict()
+    res["CLOSE_BELOW_MA_200"] = get_bootstrapped_mean_ci(
+        data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == True]["fwd_ret_4"]
+        .dropna()
+        .values
+    )
+    res["CLOSE_ABOVE_MA_200"] = get_bootstrapped_mean_ci(
+        data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == False]["fwd_ret_4"]
+        .dropna()
+        .values
+    )
+    pd.DataFrame(res).T.to_excel(EXCEL_FILE_NAME_SIMPLE) 
+```
+
+Result:
+
+![Returns above and below 200-days simple moving average](./img/above_below_ma_200.PNG)
 
 # Conclusion
 
