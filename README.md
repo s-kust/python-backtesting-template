@@ -200,7 +200,11 @@ There are two common opinions among traders:
 
 - Buy the dip!
 
-They can't both be true. 
+They can't both be true. Let's establish the truth. 
+
+The study utilized daily OHLC data from twelve popular ETFs listed in the `tickers_all` list. These ETFs include stocks, precious metals, and commodities.
+
+## Preliminary Analysis
 
 The file `customizable/add_features.py` contains a function called `add_features_v1_basic` intended to serve as an example and source of inspiration. This function includes the following code snippet, which adds a 200-day moving average and a 14-day Average True Range (ATR).
 
@@ -217,6 +221,24 @@ Next, a simple Boolean feature is created based on the 200-day moving average.
 res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
 ``` 
 
+A slightly more advanced preliminary analysis was also conducted. This approach involved splitting each ticker's data into several discrete groups based on the distance between the closing price and the 200-day moving average. After that, for each group, you can calculate and compare average returns over the next few days.
+
+The `_get_ma_200_relation_label` function was used to categorize data into groups. The distance between the closing price and the 200-day moving average is measured using 14-day Average True Range (`atr_14`). For example:
+
+``` python
+if (row["Close"] - row["ma_200"]) >= (row["atr_14"] * 6):
+    return "HIGHLY_ABOVE"
+``` 
+
+The data were divided into the following groups:
+- HIGHLY_ABOVE
+- MODERATELY_ABOVE
+- SLIGHTLY_ABOVE
+- SLIGHTLY_BELOW
+- MODERATELY_BELOW
+- HIGHLY_BELOW
+
+For details, see the `_get_ma_200_relation_label` function code.
 
 
 # Conclusion

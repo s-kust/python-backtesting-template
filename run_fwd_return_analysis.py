@@ -5,47 +5,10 @@ from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
 from customizable import add_features_v1_basic
+from customizable.misc import get_ma_200_relation_label
 from utils.bootstrap import analyze_values_by_group, get_bootstrapped_mean_ci
 from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
-
-
-def _get_ma_200_relation_label(row) -> str:
-    """
-    Determine where the closing price is
-    in relation to moving average 200 days (ma_200)
-    and return label.
-    """
-
-    if (row["Close"] >= row["ma_200"]) and (
-        (row["Close"] - row["ma_200"]) < (row["atr_14"] * 3)
-    ):
-        return "SLIGHTLY_ABOVE"
-
-    if ((row["Close"] - row["ma_200"]) >= (row["atr_14"] * 3)) and (
-        (row["Close"] - row["ma_200"]) < (row["atr_14"] * 6)
-    ):
-        return "MODERATELY_ABOVE"
-
-    if (row["Close"] - row["ma_200"]) >= (row["atr_14"] * 6):
-        return "HIGHLY_ABOVE"
-
-    if (row["Close"] < row["ma_200"]) and (
-        (row["ma_200"] - row["Close"]) < (row["atr_14"] * 3)
-    ):
-        return "SLIGHTLY_BELOW"
-
-    if ((row["ma_200"] - row["Close"]) >= (row["atr_14"] * 3)) and (
-        (row["ma_200"] - row["Close"]) < (row["atr_14"] * 6)
-    ):
-        return "MODERATELY_BELOW"
-
-    if (row["ma_200"] - row["Close"]) >= (row["atr_14"] * 6):
-        return "HIGHLY_BELOW"
-
-    # just in case, should never occur
-    return "N/A"
-
 
 if __name__ == "__main__":
     load_dotenv()
@@ -86,7 +49,7 @@ if __name__ == "__main__":
     combined_ohlc_all = pd.DataFrame()
     for ticker in tickers_data.tickers_data_with_features:
         df = tickers_data.tickers_data_with_features[ticker]
-        df[GROUP_COL_NAME] = df.apply(_get_ma_200_relation_label, axis=1)
+        df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
         combined_ohlc_all = pd.concat([combined_ohlc_all, df])
     combined_ohlc_all = combined_ohlc_all.dropna()
 
