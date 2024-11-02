@@ -56,7 +56,7 @@ def add_features_v1_basic(
     # by feature_basic True and False was launched.
     # See details in README.MD and in run_fwd_return_analysis.py.
     
-    # feature_advanced is a HIGHLY_BELOW group of the _get_ma_200_relation_label function.
+    # feature_advanced is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
     # It turned out that under these conditions,
     # in subsequent several days, returns are much higher than usually.
     # As an educational example, we launch backtests to check

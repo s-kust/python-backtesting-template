@@ -342,7 +342,79 @@ Result:
 
 ![Returns by group above and below 200-days moving average](./img/ma_200_groups.PNG)
 
-The average returns in the HIGHLY_BELOW group were significantly higher than in all other groups. This result is quite robust, as the analysis utilized data from a diverse set of ETFs.
+The average returns in the HIGHLY_BELOW group were significantly higher than in all other groups. This result is quite robust, as the analysis utilized data from a diverse set of ETFs. Running backtests of the HIGHLY_BELOW group as a signal for taking long positions seems worthwhile.
+
+## Running Backtests with One Set of Parameter Values
+
+First of all, you need to create the corresponding feature.
+
+``` python 
+    def add_features_v1_basic(
+        df: pd.DataFrame, atr_multiplier_threshold: int = 6
+    ) -> pd.DataFrame:
+    
+    ...
+
+    # feature_advanced is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
+    res["feature_advanced"] = (res["ma_200"] - res["Close"]) >= (
+        res["atr_14"] * atr_multiplier_threshold
+    )
+```
+
+The ATR multiplier could be set as a fixed value. Instead, we're being more flexible by passing it as the `atr_multiplier_threshold` input parameter. It allows us to optimize its value later, along with other parameters in the trading strategy.
+
+After creating a feature, define the rules for calculating the desired position size within the `get_desired_current_position_size` function. 
+
+If the current position is zero and `feature_advanced` is `True`, enter a 100% long position.
+
+``` python 
+    desired_position_size: Optional[float] = None
+
+    if current_position_size != 0:
+        desired_position_size = current_position_size
+        return desired_position_size, current_position_size, DPS_STUB
+    
+    if strategy._data.feature_advanced[-1] == True:
+        desired_position_size = 1.0
+    # otherwise, it remains None, i.e. signal do nothing
+
+    return desired_position_size, current_position_size, DPS_STUB
+```
+
+At this stage, you should verify and adjust the handling of special situations, including partial closing of the position and stop-losses. In the tutorial example, we skip these adjustments, leaving the default settings in place. Let's explain, edit, and run the code in the `run_strategy_main_simple.py` file. 
+
+First of all, list all parameters of your trading strategy in the `StrategyParams` class and create an instance of that class.
+
+``` python 
+    strategy_params = StrategyParams(
+        max_trade_duration_long=8,
+        max_trade_duration_short=100,
+        profit_target_long_pct=5.5,
+        profit_target_short_pct=17.999,
+        save_all_trades_in_xlsx=False,
+    )
+
+    # NOTE.
+    # In the educational example, we take only long positions,
+    # so max_trade_duration_short and profit_target_short_pct parameters
+    # are not meaningful.
+
+```
+
+To proceed, create an instance of the `TickersData` class, just as you did in the preliminary analysis. When the system runs the `__init__` function of this class, the console will display the source of the OHLC data—whether it’s retrieved from local Excel cache files or requested from external providers.
+
+To complete the setup, call the `run_all_tickers` function, providing it with the newly created objects `strategy_params` and `tickers_data` as input parameters.
+
+``` python 
+    SQN_modified_mean = run_all_tickers(
+        tickers_data=tickers_data,
+        tickers=tickers_all,
+        strategy_params=strategy_params,
+    )
+    logging.debug(f"{SQN_modified_mean=}")
+```
+
+If the code executes smoothly, it will create the output.xlsx file, allowing you to review its contents.
 
 # Conclusion
 
