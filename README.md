@@ -37,7 +37,7 @@ First, you create the necessary derived columns and one or more features based o
 
 The next step is to run a quick analysis to see how returns in the following days relate to today's values of your features. The file `run_fwd_return_analysis.py` shows how to do it, with detailed explanations in the code. 
 
-If your feature is continuous, you can split it into groups and run the `analyze_values_by_group` function. This step is optional. The function `_get_ma_200_relation_label` is an example of partitioning into groups and assigning labels to groups.
+If your feature is continuous, you can split it into groups and run the `analyze_values_by_group` function. This step is optional. The function `get_ma_200_relation_label` is an example of partitioning into groups and assigning labels to groups.
 
 Also, you could regress the future returns on your continuous feature, though there isn’t an example of such a regression in the `run_fwd_return_analysis.py` file yet.
 
@@ -62,6 +62,14 @@ After completing the steps above, run backtests on the tickers you are intereste
 Once you've conducted the backtests and reviewed the `output.xlsx` file, attempt to optimize your strategy parameters. The code and explanations in the `run_strategy_main_optimize.py` file will assist you in this process.
 
 Please note that the file `output.xlsx` is created only if the number of tickers is more than one.
+
+# Preliminary Analysis Before Running Backtests
+
+A preliminary analysis includes adding a column for forward returns (`fwd_ret_NUM_DAYS`), representing the returns for the next few days. To accomplish this, call the `add_fwd_ret` function and pass the OHLC DataFrame along with the desired number of days as parameters. After adding the column, you can analyze how these returns vary based on the specified conditions.
+
+To conduct the analysis, you'll require statistical methods for hypothesis testing and confidence interval calculation. This repository employs **bootstrapping** instead of traditional parametric methods, such as Student's t-test. The `get_bootstrapped_mean_ci` function handles the core calculations. If you are not familiar with bootstrapping, take some time to learn about it before diving into the function's code.
+
+The file `run_fwd_return_analysis.py` provides a comprehensive working example of the preliminary analysis. You will find a detailed explanation of its code in the "A Real-Life Example" section below.
 
 # How Backtests Run
 
@@ -223,7 +231,7 @@ res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
 
 A slightly more advanced preliminary analysis was also conducted. This approach involved splitting each ticker's data into several discrete groups based on the distance between the closing price and the 200-day moving average. After that, for each group, you can calculate and compare average returns over the next few days.
 
-The `_get_ma_200_relation_label` function was used to categorize data into groups. The distance between the closing price and the 200-day moving average is measured using 14-day Average True Range (`atr_14`). For example:
+The `get_ma_200_relation_label` function was used to categorize data into groups. The distance between the closing price and the 200-day moving average is measured using 14-day Average True Range (`atr_14`). For example:
 
 ``` python
 if (row["Close"] - row["ma_200"]) >= (row["atr_14"] * 6):
@@ -238,8 +246,45 @@ The data were divided into the following groups:
 - MODERATELY_BELOW
 - HIGHLY_BELOW
 
-For details, see the `_get_ma_200_relation_label` function code.
+For details, see the `get_ma_200_relation_label` function code.
 
+The following paragraphs provide an explanation of how the code in the `run_fwd_return_analysis.py` file operates.
+
+First, create an instance of the `TickersData` class, as detailed above. This instance will act as a data source for all following operations.
+
+``` python
+required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
+tickers_data = TickersData(
+    tickers=tickers_all,
+    add_feature_cols_func=add_features_v1_basic,
+    required_feature_cols=required_feature_columns,
+)
+``` 
+
+After that, add the forward returns column `fwd_ret_4` to analyze it. 
+
+``` python
+# NOTE We don't need forward returns to run backtests,
+# so we add them only here,
+# not inside the TickersData class or anywhere else.
+for ticker in tickers_data.tickers_data_with_features:
+    tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
+        ohlc_df=tickers_data.tickers_data_with_features[ticker], num_days=4
+    )
+``` 
+
+For details, see the internals of the `add_fwd_ret` function.
+
+``` python    
+    # Add a column with a group label
+    # and concatenate the DFs of all tickers into one large DF.
+    combined_ohlc_all = pd.DataFrame()
+    for ticker in tickers_data.tickers_data_with_features:
+        df = tickers_data.tickers_data_with_features[ticker]
+        df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
+        combined_ohlc_all = pd.concat([combined_ohlc_all, df])
+    combined_ohlc_all = combined_ohlc_all.dropna()
+```
 
 # Conclusion
 
