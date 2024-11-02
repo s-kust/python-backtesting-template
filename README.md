@@ -496,4 +496,4 @@ All `SQN_modified_mean` values are negative, indicating that the average trade p
 
 This repository contains a substantial amount of Python code. Unfortunately, its structure is quite complex. Due to limitations in the original `backtesting` package, simplifying it isn't feasible. Learning the available features and understanding the code's intricacies will take time and effort, but I believe it will be a worthwhile investment for you.
 
-You can follow me on [Twitter] (https://x.com/kust1983) and connect with me on [LinkedIn] (https://www.linkedin.com/in/kushchenko/).
+You can follow me on [Twitter](https://x.com/kust1983) and connect with me on [LinkedIn](https://www.linkedin.com/in/kushchenko/).
