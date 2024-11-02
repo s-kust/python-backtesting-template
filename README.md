@@ -314,6 +314,36 @@ Result:
 
 ![Returns above and below 200-days simple moving average](./img/above_below_ma_200.PNG)
 
+Now, it becomes clear that the notion that nothing good ever happens below the 200-day moving average is a misconception. However, the data we've gathered isn't sufficient to identify the conditions under which buying the dip is advisable. Would analyzing the data split into groups help with it?
+
+``` python 
+    # NOTE This is for convenient sorting of rows
+    # in the resulting Excel file.
+    group_order_ma_200_rel = {
+        "HIGHLY_ABOVE": 1,
+        "MODERATELY_ABOVE": 2,
+        "SLIGHTLY_ABOVE": 3,
+        "SLIGHTLY_BELOW": 4,
+        "MODERATELY_BELOW": 5,
+        "HIGHLY_BELOW": 6,
+        "all_data": 7,  # all_data row is important, don't miss it
+    }
+
+    analyze_values_by_group(
+        df=combined_ohlc_all,
+        group_col_name=GROUP_COL_NAME,
+        values_col_name="fwd_ret_4",
+        group_order_map=group_order_ma_200_rel,
+        excel_file_name=EXCEL_FILE_NAME_BY_GROUP,
+    )
+```
+
+Result:
+
+![Returns by group above and below 200-days moving average](./img/ma_200_groups.PNG)
+
+The average returns in the HIGHLY_BELOW group were significantly higher than in all other groups. This result is quite robust, as the analysis utilized data from a diverse set of ETFs.
+
 # Conclusion
 
 This repository contains a substantial amount of Python code. Unfortunately, its structure is quite complex. Due to limitations in the original `backtesting` package, simplifying it isn't feasible. Learning the available features and understanding the code's intricacies will take time and effort, but I believe it will be a worthwhile investment for you.
