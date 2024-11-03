@@ -414,7 +414,7 @@ To complete the setup, call the `run_all_tickers` function, providing it with th
     logging.debug(f"{SQN_modified_mean=}")
 ```
 
-If the code executes smoothly, it will create the output.xlsx file, allowing you to review its contents.
+If the code executes smoothly, it will create the `output.xlsx` file, allowing you to review its contents.
 
 ## Optimizing Parameter Values
 
@@ -468,7 +468,6 @@ In the main section of the file, start by defining the parameter value ranges yo
 
 ``` python 
 # Here you list the parameters you want to optimize, as well as their value ranges.
-# The parameters must be a subset of the StrategyParams class fields.
 # These same parameters must be used
 # when calling the run_all_tickers_with_parameters() function.
 max_trade_duration_long_vals = range(9, 11)

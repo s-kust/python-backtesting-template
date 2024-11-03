@@ -30,12 +30,10 @@ def get_desired_current_position_size(
         if strategy.position.size != 0
         else 0
     )
-    # NOTE strategy always has some forecast, see Strategy init()
-    forecast = strategy.forecast.s.iloc[-1]
 
     # These are examples of data that you can extract from a strategy
     # and use to calculate the desired position size
-    today_date = strategy.forecast.s.index[-1]
+    today_date = strategy._data.index[-1]
     last_trade = strategy.closed_trades[-1] if strategy.closed_trades else None
     current_pl = strategy.trades[-1].pl if strategy.trades else None
 

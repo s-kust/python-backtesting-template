@@ -6,7 +6,6 @@ import pandas as pd
 from backtesting import Backtest, Strategy
 
 from customizable import StrategyParams, get_desired_current_position_size
-from utils.misc import get_forecast_bb
 from utils.strategy_exec import (
     adjust_position,
     all_current_trades_info,
@@ -36,12 +35,6 @@ def run_backtest_for_ticker(
             # and process_special_situations()
             self.parameters = strategy_params
 
-            # NOTE This forecast is used only
-            # in several special situations, not very meaningful.
-            # You configure the really important stuff
-            # inside get_desired_current_position_size and add_features_XXX functions
-            # and in special situations.
-            self.forecast = self.I(get_forecast_bb, data)
 
             # NOTE ATR is used in update_stop_losses
             self.atr = pd.Series(self.data.tr).rolling(50).mean().bfill().values

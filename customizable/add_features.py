@@ -1,7 +1,6 @@
 import pandas as pd
 
 from features.ma import add_moving_average
-from forecast.forecast_bb import add_bb_forecast
 
 
 def add_features_v1_basic(
@@ -31,10 +30,6 @@ def add_features_v1_basic(
     # res['atr_14'] = res['tr'].rolling(14).mean()
 
     res = df.copy()
-
-    # NOTE better don't remove this line
-    # TODO Try to make backtests run without this line.
-    res = add_bb_forecast(df=res, col_name="Close")
 
     # Customize below
 

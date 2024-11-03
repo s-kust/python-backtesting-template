@@ -83,7 +83,6 @@ if __name__ == "__main__":
     all_results: List[dict] = list()
 
     # Here you list the parameters you want to optimize, as well as their value ranges.
-    # The parameters must be a subset of the StrategyParams class fields.
     # These same parameters must be used
     # when calling the run_all_tickers_with_parameters() function.
     max_trade_duration_long_vals = range(9, 11)

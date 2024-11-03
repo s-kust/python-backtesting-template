@@ -92,9 +92,8 @@ def get_shares_count(equity: float, position_size_delta: float, last_price: floa
 
 
 def log_initial_data_for_today(strategy: Strategy, ticker: str):
-    logging.debug(f"{ticker=}, today's date {strategy.forecast.s.index[-1]}")
+    logging.debug(f"{ticker=}, today's date {strategy._data.index[-1]}")
     logging.debug(f"shares_count {strategy.position.size}")
     logging.debug(f"today's open price {strategy._data.Open[-1]}")
     logging.debug(f"equity {strategy.equity}")
     logging.debug(f"tr_delta {strategy.data.tr_delta[-1]}")
-    logging.debug(f"forecast {strategy.forecast.s.iloc[-1]}")
