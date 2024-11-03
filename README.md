@@ -430,6 +430,40 @@ Be particularly mindful of the `atr_multiplier_threshold` parameter. This parame
 
 Now, let’s examine the `run_strategy_main_optimize.py` file. In this file, the creation of instances for the `StrategyParams` and `TickersData` classes, along with the execution of the `run_all_tickers` function, has been moved to a standalone function, `run_all_tickers_with_parameters`. This function accepts the strategy parameter values as inputs and returns `SQN_modified_mean`.
 
+## Feature Creation Optimization: Fine-Tuning Parameters
+
+You’ll create a function to add derived columns and features to your data. Its recommended location is in the `\customizable\add_features.py` file. In the example provided, this function is called `add_features_v1_basic`. It has one input parameter, `atr_multiplier_threshold`. Your custom function will likely have one or more input parameters as well. You may want to optimize them for the best results.
+
+When creating a `TickersData` instance, the system calls a function to add features. You specify this function through the `add_feature_cols_func` parameter. However, you can’t directly pass input parameter values. The solution is to use `functools.partial`, as shown in the example below.
+
+``` python 
+    # make add_features_v1_basic function
+    # use the atr_multiplier_threshold input
+    # instead of default value
+    p_add_features_v1 = partial(
+        add_features_v1_basic, atr_multiplier_threshold=atr_multiplier_threshold
+    )
+    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
+    tickers_data = TickersData(
+        add_feature_cols_func=p_add_features_v1,
+        tickers=tickers_all,
+        required_feature_cols=required_feature_columns,
+        recreate_features_every_time=True
+        # NOTE If recreate_features_every_time=False,
+        # atr_multiplier_threshold optimization won't work
+    )
+```
+
+The `recreate_features_every_time` parameter deserves close attention. By default, its value is `False`.
+
+The system stores cached data, including derived columns and features, in Excel files in the `\tmp\` folder.
+
+![Local cache of OHLC data with features](./img/cache_data_with_features.PNG)
+
+If you don’t set `recreate_features_every_time` to `True`, the system will load data from these files rather than calling the feature-creation function each time. As a result, optimizing the input parameters of the feature-creation function won’t be effective.
+
+## Finding Optimal Parameter Values Through Trial and Error
+
 In the main section of the file, start by defining the parameter value ranges you'd like to test.
 
 ``` python 
