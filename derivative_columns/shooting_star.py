@@ -43,7 +43,10 @@ def check_shooting_star_candle(
     return True
 
 
-def add_feature_is_shooting_star(df: pd.DataFrame) -> pd.DataFrame:
+def add_col_is_shooting_star(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add column is_shooting_star
+    """
     res = df.copy()
     res["yd_high"] = res["High"].shift(1)
     res["yd_low"] = res["Low"].shift(1)
