@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Callable, Dict, List, Set
+from typing import Callable, Dict, List, Optional, Set
 
 import pandas as pd
 
@@ -59,6 +59,44 @@ class TickersData:
 
             self.tickers_data_with_features[ticker] = df
 
+    def _read_raw_data_from_xlsx(self) -> Optional[pd.DataFrame]:
+        if os.path.exists(self.filename_raw) and os.path.getsize(self.filename_raw) > 0:
+            df = pd.read_excel(self.filename_raw, index_col=0)
+            df = df[["Open", "High", "Low", "Close", "Volume"]]
+            df = self.add_feature_cols_func(df=df)
+
+            # save cache files only if they will be used later
+            if not self.recreate_columns_every_time:
+                df.to_excel(self.filename_with_features)
+                print(f"Saved {self.filename_with_features} - OK")
+
+            print(f"Reading {self.filename_raw} - OK")
+            return df
+        return None
+
+    def _import_data_from_external_provider(self, ticker: str) -> pd.DataFrame:
+        """
+        Try to request OHLC data from an external provider.
+        If it fails, raise an exception.
+        If it succeeds, add additional columns to the data,
+        save local Excel cache files, and return the DataFrame.
+        """
+        print(
+            f"Running {self.import_ohlc_func.__name__} for {ticker=}...",
+            file=sys.stderr,
+        )
+        df = self.import_ohlc_func(ticker=ticker)
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:
+            error_msg = f"get_df_with_features: failed call of {self.import_ohlc_func} for {ticker=}, returned {df=}"  # pylint: disable=C0301
+            raise RuntimeError(error_msg)
+        df.to_excel(self.filename_raw)
+        print(f"Saved {self.filename_raw} - OK")
+        df = self.add_feature_cols_func(df=df)
+        if not self.recreate_columns_every_time:
+            df.to_excel(self.filename_with_features)
+            print(f"Saved {self.filename_with_features} - OK")
+        return df
+
     def get_df_with_features(self, ticker: str) -> pd.DataFrame:
         """
         1. Try to read OHLC data with additional columns from local XLSX file.
@@ -74,56 +112,37 @@ class TickersData:
         and with added features. Return DataFrame.
         """
 
+        self.filename_with_features = get_local_ticker_data_file_name(
+            ticker=ticker, data_type="with_features"
+        )
+
+        if self.recreate_columns_every_time is False:
+            if (
+                os.path.exists(self.filename_with_features)
+                and os.path.getsize(self.filename_with_features) > 0
+            ):
+                df = pd.read_excel(self.filename_with_features, index_col=0)
+                print(f"Reading {self.filename_with_features} - OK")
+                return df
+
         # if self.recreate_columns_every_time is True -
         # don't use locally cached derived columns,
-        # recreate them every time.
+        # recreate them every time,
+        # i.e. don't try to read self.filename_with_features.
+
         # This is needed for cases when the add_feature_cols_func function
         # is called with different parameters,
         # in order to optimize these parameters.
         # See also the run_strategy_main_optimize.py file.
-        if not self.recreate_columns_every_time:
-            # try to read feature columns from local cache files
-            #  instead of recalculating them
-            filename_with_features = get_local_ticker_data_file_name(
-                ticker=ticker, data_type="with_features"
-            )
-            if (
-                os.path.exists(filename_with_features)
-                and os.path.getsize(filename_with_features) > 0
-            ):
-                df = pd.read_excel(filename_with_features, index_col=0)
-                print(f"Reading {filename_with_features} - OK")
-                return df
 
-        filename_raw = get_local_ticker_data_file_name(ticker=ticker, data_type="raw")
-        if os.path.exists(filename_raw) and os.path.getsize(filename_raw) > 0:
-            df = pd.read_excel(filename_raw, index_col=0)
-            df = df[["Open", "High", "Low", "Close", "Volume"]]
-            df = self.add_feature_cols_func(df=df)
-
-            # save cache files only if they will be used later
-            if not self.recreate_columns_every_time:
-                df.to_excel(filename_with_features)
-                print(f"Saved {filename_with_features} - OK")
-
-            print(f"Reading {filename_raw} - OK")
-            return df
-
-        print(
-            f"Running {self.import_ohlc_func.__name__} for {ticker=}...",
-            file=sys.stderr,
+        self.filename_raw = get_local_ticker_data_file_name(
+            ticker=ticker, data_type="raw"
         )
-        df = self.import_ohlc_func(ticker=ticker)
-        if df is None or not isinstance(df, pd.DataFrame) or df.empty:
-            error_msg = f"get_df_with_features: failed call of {self.import_ohlc_func} for {ticker=}, returned {df=}"  # pylint: disable=C0301
-            raise RuntimeError(error_msg)
-        df.to_excel(filename_raw)
-        print(f"Saved {filename_raw} - OK")
-        df = self.add_feature_cols_func(df=df)
-        if not self.recreate_columns_every_time:
-            df.to_excel(filename_with_features)
-            print(f"Saved {filename_with_features} - OK")
-        return df
+        res = self._read_raw_data_from_xlsx()
+        if res is not None:
+            return res
+
+        return self._import_data_from_external_provider(ticker=ticker)
 
     def get_data(self, ticker: str) -> pd.DataFrame:
         """
