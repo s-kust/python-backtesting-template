@@ -1,3 +1,4 @@
+# pylint: disable=E2515
 import logging
 import sys
 
@@ -22,7 +23,7 @@ if __name__ == "__main__":
     load_dotenv()
 
     # clear LOG_FILE every time
-    open(LOG_FILE, "w").close()
+    open(LOG_FILE, "w", encoding="UTF-8").close()
 
     # Here you can set different parameters of your strategy.
     # They will eventually be passed
@@ -52,7 +53,7 @@ if __name__ == "__main__":
     # Now we collect DataFrames with data and derived columns
     # for all the tickers we are interested in.
     # This data is stored in the TickersData class instance
-    # as a dictionary whose keys are tickers and the values ​​are DFs.
+    # as a dictionary whose keys are tickers and values ​​are DFs.
     # For more details, see the class TickersData internals,
     # and the add_features_v1_basic function.
     required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
@@ -67,5 +68,5 @@ if __name__ == "__main__":
         tickers=tickers_all,
         strategy_params=strategy_params,
     )
-    logging.debug(f"{SQN_modified_mean=}")
+    logging.debug(f"{SQN_modified_mean=}")  # pylint: disable=W1203
     print(f"{SQN_modified_mean=}, see also output.xslx", file=sys.stderr)

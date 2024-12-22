@@ -33,7 +33,7 @@ def run_all_tickers_with_parameters(
     # with some minor changes explained below.
 
     # clear LOG_FILE every time
-    open(LOG_FILE, "w").close()
+    open(LOG_FILE, "w", encoding="UTF-8").close()
 
     strategy_params = StrategyParams(
         max_trade_duration_long=max_trade_duration_long,
@@ -67,14 +67,14 @@ def run_all_tickers_with_parameters(
         # atr_multiplier_threshold optimization won't work
     )
 
-    SQN_modified_mean = run_all_tickers(
+    sqn_modified_mean = run_all_tickers(
         tickers=tickers_all, strategy_params=strategy_params, tickers_data=tickers_data
     )
 
     # NOTE Why SQN_modified_mean is used
     # as an optimization criterion,
     # see the README.md file.
-    return SQN_modified_mean
+    return sqn_modified_mean
 
 
 if __name__ == "__main__":
@@ -106,24 +106,24 @@ if __name__ == "__main__":
         atr_multiplier_threshold_vals,
     )
 
-    counter = 0
+    counter = 0  # pylint: disable=C0103
     for item in combinations:
-        counter = counter + 1
+        counter = counter + 1  # pylint: disable=C0103
         print(f"Running combination {counter} of {total_count}...")
-        max_trade_duration_long = item[0]
-        profit_target_long_pct = item[1]
-        atr_multiplier_threshold = item[2]
-        SQN_modified_mean = run_all_tickers_with_parameters(
-            max_trade_duration_long=max_trade_duration_long,
-            profit_target_long_pct=profit_target_long_pct,
-            atr_multiplier_threshold=atr_multiplier_threshold,
+        max_trade_duration_long_val = item[0]
+        profit_target_long_pct_val = item[1]
+        atr_multiplier_threshold_val = item[2]
+        SQN_modified_mean_val = run_all_tickers_with_parameters(
+            max_trade_duration_long=max_trade_duration_long_val,
+            profit_target_long_pct=profit_target_long_pct_val,
+            atr_multiplier_threshold=atr_multiplier_threshold_val,
             save_all_trades_in_xlsx=False,
         )
         result = {
-            "max_duration_long": max_trade_duration_long,
-            "profit_tgt_lg_pct": profit_target_long_pct,
-            "atr_multiplier": atr_multiplier_threshold,
-            "SQN_m_mean": SQN_modified_mean,
+            "max_duration_long": max_trade_duration_long_val,
+            "profit_tgt_lg_pct": profit_target_long_pct_val,
+            "atr_multiplier": atr_multiplier_threshold_val,
+            "SQN_m_mean": SQN_modified_mean_val,
         }
         all_results.append(result)
         # save to Excel file every time in case the script execution is interrupted.
