@@ -6,7 +6,7 @@ import pandas as pd
 
 def ensure_df_has_all_required_columns(
     df: pd.DataFrame, volume_col_required: bool = False
-):
+) -> None:
     if volume_col_required:
         required_columns = ["Open", "High", "Low", "Close", "Volume"]
     else:

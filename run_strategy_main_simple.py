@@ -4,7 +4,8 @@ import sys
 from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
-from customizable import StrategyParams, add_features_v1_basic
+from customizable import StrategyParams
+from features.f_v1_basic import add_features_v1_basic
 from strategy import run_all_tickers
 from utils.local_data import TickersData
 

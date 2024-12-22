@@ -7,7 +7,8 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
-from customizable import StrategyParams, add_features_v1_basic
+from customizable import StrategyParams
+from features.f_v1_basic import add_features_v1_basic
 from strategy import run_all_tickers
 from utils.local_data import TickersData
 
@@ -61,7 +62,7 @@ def run_all_tickers_with_parameters(
         add_feature_cols_func=p_add_features_v1,
         tickers=tickers_all,
         required_feature_cols=required_feature_columns,
-        recreate_features_every_time=True
+        recreate_features_every_time=True,
         # NOTE If recreate_features_every_time=False,
         # atr_multiplier_threshold optimization won't work
     )

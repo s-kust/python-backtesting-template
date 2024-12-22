@@ -5,8 +5,8 @@ from typing import Callable, Dict, List, Set
 import pandas as pd
 
 from constants import tickers_all
-from customizable import add_features_v1_basic
 from derivative_columns.atr import add_tr_delta_col_to_ohlc
+from features.f_v1_basic import add_features_v1_basic
 
 from .import_data import get_local_ticker_data_file_name, import_alpha_vantage_daily
 

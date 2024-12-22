@@ -2,7 +2,7 @@ from typing import Callable
 
 import pandas as pd
 
-from customizable import add_features_v1_basic
+from features.f_v1_basic import add_features_v1_basic
 
 
 def get_df_with_fwd_ret(
@@ -10,7 +10,6 @@ def get_df_with_fwd_ret(
     num_days: int = 24,
     add_features_forecasts_func: Callable = add_features_v1_basic,
 ) -> pd.DataFrame:
-
     """
     This function is used if you want to analyze
     forward Close-Close returns rather than trades.

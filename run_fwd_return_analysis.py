@@ -4,8 +4,8 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
-from customizable import add_features_v1_basic
 from customizable.misc import get_ma_200_relation_label
+from features.f_v1_basic import add_features_v1_basic
 from utils.bootstrap import analyze_values_by_group, get_bootstrapped_mean_ci
 from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
@@ -50,12 +50,12 @@ if __name__ == "__main__":
     for ticker in tickers_data.tickers_data_with_features:
         df = tickers_data.tickers_data_with_features[ticker]
         df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
-        
-        # NOTE 
-        # You must still create combined_ohlc_all, 
+
+        # NOTE
+        # You must still create combined_ohlc_all,
         # even if you don't plan to split the data into groups.
         combined_ohlc_all = pd.concat([combined_ohlc_all, df])
-    
+
     combined_ohlc_all = combined_ohlc_all.dropna()
 
     # just in case...
