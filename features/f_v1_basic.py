@@ -69,7 +69,7 @@ def add_features_v1_basic(
 
     # FEATURE_COL_NAME_ADVANCED is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
     # It turned out that under these conditions,
-    # in subsequent several days, returns are much higher than usually.
+    # in subsequent days, returns are much higher than usually.
     # As an educational example, we launch backtests to check
     # whether this feature is worth using as a signal to take a long position.
     res[FEATURE_COL_NAME_ADVANCED] = (res["ma_200"] - res["Close"]) >= (

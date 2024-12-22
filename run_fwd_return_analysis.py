@@ -176,6 +176,9 @@ if __name__ == "__main__":
         add_feature_cols_func=add_features_v1_basic,
     )
 
+    # Now we run the test for each number of days in the range,
+    # get the list of dictionaries
+    # and make the resulting DataFrame from it.
     res: List[dict] = list()
     FWD_RETURN_DAYS_MAX = 16
     for fwd_return_days in range(2, FWD_RETURN_DAYS_MAX + 1):
@@ -202,6 +205,10 @@ if __name__ == "__main__":
         f"Analysis complete! Now you may explore the results file {EXCEL_FILE_NAME_SIMPLE}",
         file=sys.stderr,
     )
+
+    # NOTE It is not obligatory to bother with splitting into groups
+    # and calling add_group_label_analyze_save().
+    # The method demonstrated above may be enough for you.
     add_group_label_analyze_save(
         tickers_data=tickers_data_instance,
         excel_file_name=EXCEL_FILE_NAME_BY_GROUP,
