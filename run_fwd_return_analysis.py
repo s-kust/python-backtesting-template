@@ -1,3 +1,5 @@
+# pylint: disable=C0121
+# pylint: disable=E2515
 import sys
 
 import pandas as pd
@@ -14,7 +16,7 @@ if __name__ == "__main__":
     load_dotenv()
 
     # clear LOG_FILE every time
-    open(LOG_FILE, "w").close()
+    open(LOG_FILE, "w", encoding="UTF-8").close()
 
     EXCEL_FILE_NAME_BY_GROUP = "res_ma_200_by_group.xlsx"
     EXCEL_FILE_NAME_SIMPLE = "res_ma_200_above_below.xlsx"
@@ -23,7 +25,7 @@ if __name__ == "__main__":
     # The first step is to collect DataFrames with data and derived columns
     # for all the tickers we are interested in.
     # This data is stored in the TickersData class instance
-    # as a dictionary whose keys are tickers and the values ​​are DFs.
+    # as a dictionary whose keys are tickers and values ​are DFs.
 
     # For more details, see the class TickersData internals,
     # and the add_features_v1_basic function.
@@ -47,8 +49,7 @@ if __name__ == "__main__":
     # Add a column with a group label
     # and concatenate the DFs of all tickers into one large DF.
     combined_ohlc_all = pd.DataFrame()
-    for ticker in tickers_data.tickers_data_with_features:
-        df = tickers_data.tickers_data_with_features[ticker]
+    for ticker, df in tickers_data.tickers_data_with_features.items():
         df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
 
         # NOTE
@@ -76,12 +77,12 @@ if __name__ == "__main__":
     res["CLOSE_BELOW_MA_200"] = get_bootstrapped_mean_ci(
         data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == True]["fwd_ret_4"]
         .dropna()
-        .values
+        .values  # type: ignore
     )
     res["CLOSE_ABOVE_MA_200"] = get_bootstrapped_mean_ci(
         data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == False]["fwd_ret_4"]
         .dropna()
-        .values
+        .values  # type: ignore
     )
     pd.DataFrame(res).T.to_excel(EXCEL_FILE_NAME_SIMPLE)
 
@@ -107,6 +108,6 @@ if __name__ == "__main__":
         excel_file_name=EXCEL_FILE_NAME_BY_GROUP,
     )
     print(
-        f"Analysis complete! Now you may explore the results files {EXCEL_FILE_NAME_SIMPLE} and {EXCEL_FILE_NAME_BY_GROUP}",
+        f"Complete! Please see the files {EXCEL_FILE_NAME_SIMPLE}, {EXCEL_FILE_NAME_BY_GROUP}",
         file=sys.stderr,
     )
