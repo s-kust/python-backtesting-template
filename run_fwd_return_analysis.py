@@ -22,7 +22,7 @@ from utils.local_data import TickersData
 
 def _check_feature_for_fwd_ret_days(
     tickers_data: TickersData,
-    res: List[dict],
+    res_to_return: List[dict],
     fwd_ret_days: int,
     feature_col_name: str,
     insert_empty_row: bool = True,
@@ -47,21 +47,21 @@ def _check_feature_for_fwd_ret_days(
                 num_days=fwd_ret_days,
             )
 
-    combined_ohlc_all = pd.DataFrame()
+    combined_df_all = pd.DataFrame()
     for ticker in tickers_data.tickers_data_with_features:
-        combined_ohlc_all = pd.concat(
-            [combined_ohlc_all, tickers_data.tickers_data_with_features[ticker]]
+        combined_df_all = pd.concat(
+            [combined_df_all, tickers_data.tickers_data_with_features[ticker]]
         )
 
-    mask_feature_true = combined_ohlc_all[feature_col_name] == True
-    mask_feature_false = combined_ohlc_all[feature_col_name] == False
+    mask_feature_true = combined_df_all[feature_col_name] == True
+    mask_feature_false = combined_df_all[feature_col_name] == False
 
     returns_f_true = (
-        combined_ohlc_all[mask_feature_true][f"fwd_ret_{fwd_ret_days}"].dropna().values
+        combined_df_all[mask_feature_true][f"fwd_ret_{fwd_ret_days}"].dropna().values
     )
 
     returns_f_false = (
-        combined_ohlc_all[mask_feature_false][f"fwd_ret_{fwd_ret_days}"].dropna().values
+        combined_df_all[mask_feature_false][f"fwd_ret_{fwd_ret_days}"].dropna().values
     )
 
     # This saves memory and speeds up the execution.
@@ -81,8 +81,8 @@ def _check_feature_for_fwd_ret_days(
     res_f_true["feature"] = True
     res_f_false["feature"] = False
 
-    res.append(res_f_true)
-    res.append(res_f_false)
+    res_to_return.append(res_f_true)
+    res_to_return.append(res_f_false)
 
     if insert_empty_row:
         # create an empty row and append it to the resulting list
@@ -94,80 +94,35 @@ def _check_feature_for_fwd_ret_days(
         res_f_empty["mean_val"] = np.nan
         res_f_empty["positive_pct"] = np.nan
         res_f_empty["count"] = np.nan
-        res.append(res_f_empty)
+        res_to_return.append(res_f_empty)
 
-    return res
+    return res_to_return
 
 
-if __name__ == "__main__":
-    load_dotenv()
+def add_group_label_analyze_save(
+    tickers_data: TickersData, excel_file_name: str, fwd_red_n_days: int
+) -> None:
+    group_col_name = "close_rel_ma_200_group"
 
-    # clear LOG_FILE every time
-    open(LOG_FILE, "w", encoding="UTF-8").close()
-
-    EXCEL_FILE_NAME_BY_GROUP = "res_ma_200_by_group.xlsx"
-    EXCEL_FILE_NAME_SIMPLE = "res_ma_200_above_below.xlsx"
-    GROUP_COL_NAME = "close_rel_ma_200_group"
-
-    # The first step is to collect DataFrames with data and derived columns
-    # for all the tickers we are interested in.
-    # This data is stored in the TickersData class instance
-    # as a dictionary whose keys are tickers and values ​are DFs.
-
-    # For more details, see the class TickersData internals
-    # and the add_features_v1_basic function.
-    tickers_data = TickersData(
-        tickers=tickers_all,
-        add_feature_cols_func=add_features_v1_basic,
-    )
-
-    res: List[dict] = list()
-    FWD_RETURN_DAYS_MAX = 6
-    for fwd_return_days in range(2, FWD_RETURN_DAYS_MAX + 1):
-        print(
-            f"Now check for fwd returns {fwd_return_days} days - up to {FWD_RETURN_DAYS_MAX}"
-        )
-        res = _check_feature_for_fwd_ret_days(
-            tickers_data=tickers_data,
-            res=res,
-            fwd_ret_days=fwd_return_days,
-            insert_empty_row=True,
-            feature_col_name=FEATURE_COL_NAME_BASIC,
-        )
-    df = pd.DataFrame(res)
-
-    # change order of columns for convenience
-    df.insert(0, "feature", df.pop("feature"))
-    df.insert(0, "fwd_ret_days", df.pop("fwd_ret_days"))
-
-    df.sort_values(["fwd_ret_days", "feature"], ascending=[True, True])
-    df.loc[df["mean_val"] != df["mean_val"], "fwd_ret_days"] = np.nan
-    df.to_excel(EXCEL_FILE_NAME_SIMPLE, index=False)
-    print(
-        f"Analysis complete! Now you may explore the results file {EXCEL_FILE_NAME_SIMPLE}",
-        file=sys.stderr,
-    )
-
-    # Now add forward returns column fwd_ret_4 to analyze it
+    # Now add forward returns column to analyze it
 
     # NOTE We don't need forward returns to run backtests,
     # so we add them only here,
     # not inside the TickersData class or anywhere else.
     for ticker in tickers_data.tickers_data_with_features:
         tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
-            ohlc_df=tickers_data.tickers_data_with_features[ticker], num_days=4
+            ohlc_df=tickers_data.tickers_data_with_features[ticker],
+            num_days=fwd_red_n_days,
         )
 
     # Add a column with a group label
     # and concatenate the DFs of all tickers into one large DF.
     combined_ohlc_all = pd.DataFrame()
-    for ticker, df in tickers_data.tickers_data_with_features.items():
-        df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
-
-        # NOTE
-        # You must still create combined_ohlc_all,
-        # even if you don't plan to split the data into groups.
-        combined_ohlc_all = pd.concat([combined_ohlc_all, df])
+    for ticker, ohlc_df in tickers_data.tickers_data_with_features.items():
+        ohlc_df[group_col_name] = ohlc_df.apply(get_ma_200_relation_label, axis=1)
+        combined_ohlc_all = pd.concat([combined_ohlc_all, ohlc_df])
+        del ohlc_df[group_col_name]
+        del ohlc_df[f"fwd_ret_{fwd_red_n_days}"]
 
     combined_ohlc_all = combined_ohlc_all.dropna()
 
@@ -178,14 +133,6 @@ if __name__ == "__main__":
 
     # Up until this point there has been preparation,
     # and now the analysis will be carried out.
-
-    # simple separation: close above and below MA_200
-
-    # NOTE
-    # in add_features_v1_basic()
-    # res["feature"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
-
-    # advanced separation: by groups
 
     # NOTE This is for convenient sorting of rows
     # in the resulting Excel file.
@@ -201,10 +148,64 @@ if __name__ == "__main__":
 
     analyze_values_by_group(
         df=combined_ohlc_all,
-        group_col_name=GROUP_COL_NAME,
-        values_col_name="fwd_ret_4",
+        group_col_name=group_col_name,
+        values_col_name=f"fwd_ret_{fwd_red_n_days}",
         group_order_map=group_order_ma_200_rel,
+        excel_file_name=excel_file_name,
+    )
+
+
+if __name__ == "__main__":
+    load_dotenv()
+
+    # clear LOG_FILE every time
+    open(LOG_FILE, "w", encoding="UTF-8").close()
+
+    EXCEL_FILE_NAME_BY_GROUP = "res_ma_200_by_group.xlsx"
+    EXCEL_FILE_NAME_SIMPLE = "res_ma_200_above_below.xlsx"
+
+    # The first step is to collect DataFrames with data and derived columns
+    # for all the tickers we are interested in.
+    # This data is stored in the TickersData class instance
+    # as a dictionary whose keys are tickers and values ​are DFs.
+
+    # For more details, see the class TickersData internals
+    # and the add_features_v1_basic function.
+    tickers_data_instance = TickersData(
+        tickers=tickers_all,
+        add_feature_cols_func=add_features_v1_basic,
+    )
+
+    res: List[dict] = list()
+    FWD_RETURN_DAYS_MAX = 16
+    for fwd_return_days in range(2, FWD_RETURN_DAYS_MAX + 1):
+        print(
+            f"Now check for fwd returns {fwd_return_days} days - up to {FWD_RETURN_DAYS_MAX}"
+        )
+        res = _check_feature_for_fwd_ret_days(
+            tickers_data=tickers_data_instance,
+            res_to_return=res,
+            fwd_ret_days=fwd_return_days,
+            insert_empty_row=True,
+            feature_col_name=FEATURE_COL_NAME_BASIC,
+        )
+    df = pd.DataFrame(res)
+
+    # Manipulate with columns for viewing convenience
+    df.insert(0, "feature", df.pop("feature"))
+    df.insert(0, "fwd_ret_days", df.pop("fwd_ret_days"))
+    df.sort_values(["fwd_ret_days", "feature"], ascending=[True, True])
+    df.loc[df["mean_val"] != df["mean_val"], "fwd_ret_days"] = np.nan
+
+    df.to_excel(EXCEL_FILE_NAME_SIMPLE, index=False)
+    print(
+        f"Analysis complete! Now you may explore the results file {EXCEL_FILE_NAME_SIMPLE}",
+        file=sys.stderr,
+    )
+    add_group_label_analyze_save(
+        tickers_data=tickers_data_instance,
         excel_file_name=EXCEL_FILE_NAME_BY_GROUP,
+        fwd_red_n_days=4,
     )
     print(
         f"Complete! Please see the files {EXCEL_FILE_NAME_SIMPLE}, {EXCEL_FILE_NAME_BY_GROUP}",

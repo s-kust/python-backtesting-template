@@ -57,7 +57,7 @@ def analyze_values_by_group(
     values_col_name: str,
     group_order_map: dict,
     excel_file_name: str = "analyze_values_by_group.xlsx",
-):
+) -> None:
     """
     Input: DataFrame containing some values classified by groups.
     For every group, get its values_col_name mean value
@@ -78,7 +78,7 @@ def analyze_values_by_group(
         res[group_name] = get_bootstrapped_mean_ci(
             data=df[df[group_col_name] == group_name][values_col_name].dropna().values
         )
-    print(f"analyze_values_by_group: running final all_data...", file=sys.stderr)
+    print("analyze_values_by_group: running final all_data...", file=sys.stderr)
     res["all_data"] = get_bootstrapped_mean_ci(data=df[values_col_name].dropna().values)
     df = pd.DataFrame(res).T
 

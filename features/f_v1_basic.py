@@ -64,6 +64,8 @@ def add_features_v1_basic(
     # NOTE 2
     # You may want to skip creating FEATURE_COL_NAME_ADVANCED,
     # limiting yourself to just FEATURE_COL_NAME_BASIC.
+    # In this case, in the file get_position_size_main.py
+    # change FEATURE_COL_NAME_ADVANCED to FEATURE_COL_NAME_BASIC.
 
     # FEATURE_COL_NAME_ADVANCED is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
     # It turned out that under these conditions,

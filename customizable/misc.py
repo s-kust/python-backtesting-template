@@ -1,4 +1,7 @@
-def get_ma_200_relation_label(row) -> str:
+import pandas as pd
+
+
+def get_ma_200_relation_label(row: pd.Series) -> str:
     """
     Determine where the closing price is
     in relation to moving average 200 days (ma_200)
