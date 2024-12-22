@@ -92,12 +92,13 @@ def check_ohlc_df(
 
 
 def import_alpha_vantage_daily(ticker: str) -> pd.DataFrame:
-    """ """
     raw_data_daily: dict = get_daily_raw_from_alpha_vantage(ticker=ticker)
     data_daily: pd.DataFrame = transform_a_v_raw_data_to_df(
         data=raw_data_daily, key_name="Time Series (Daily)"
     )
     check_ohlc_df(df=data_daily, data_type="Daily", volume_required=True)
+    for col in data_daily.columns:
+        data_daily[col] = pd.to_numeric(data_daily[col])
     return data_daily
 
 
@@ -140,6 +141,3 @@ def get_local_ticker_data_file_name(ticker: str, data_type: str = "raw") -> str:
     raise ValueError(
         f"get_local_ticker_data_file_name: wrong {data_type=}, should be raw or with_features"
     )
-
-
-
