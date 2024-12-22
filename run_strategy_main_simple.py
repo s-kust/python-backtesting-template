@@ -54,13 +54,11 @@ if __name__ == "__main__":
     # for all the tickers we are interested in.
     # This data is stored in the TickersData class instance
     # as a dictionary whose keys are tickers and values ​​are DFs.
-    # For more details, see the class TickersData internals,
+    # For more details, see the class TickersData internals
     # and the add_features_v1_basic function.
-    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
     tickers_data = TickersData(
         add_feature_cols_func=add_features_v1_basic,
         tickers=tickers_all,
-        required_feature_cols=required_feature_columns,
     )
 
     SQN_modified_mean = run_all_tickers(

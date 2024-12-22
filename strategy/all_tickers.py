@@ -1,3 +1,5 @@
+# pylint: disable=E1136
+# pylint: disable=E1137
 import sys
 from typing import List, Optional, Tuple
 
@@ -61,7 +63,7 @@ def get_stat_and_trades(
 def run_all_tickers(
     tickers_data: TickersData,
     strategy_params: StrategyParams,
-    tickers: List[str] = tickers_all,
+    tickers: List[str],
 ) -> float:
     """
     1. For every ticker, run get_stat_and_trades.
@@ -72,7 +74,7 @@ def run_all_tickers(
     """
 
     # clear LOG_FILE every time
-    open(LOG_FILE, "w").close()
+    open(LOG_FILE, "w", encoding="UTF-8").close()
 
     performance_res = pd.DataFrame()
     if strategy_params.save_all_trades_in_xlsx:
@@ -82,7 +84,10 @@ def run_all_tickers(
     for ticker in tickers:
         counter = counter + 1
         print("", file=sys.stderr)
-        print(f"Running {ticker=}, {counter} of {total_len}...", file=sys.stderr)
+        print(
+            f"Running backtest for {ticker=}, {counter} of {total_len}...",
+            file=sys.stderr,
+        )
 
         ticker_data = tickers_data.get_data(ticker=ticker)
 

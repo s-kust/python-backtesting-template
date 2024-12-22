@@ -57,13 +57,11 @@ def run_all_tickers_with_parameters(
     p_add_features_v1 = partial(
         add_features_v1_basic, atr_multiplier_threshold=atr_multiplier_threshold
     )
-    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
     tickers_data = TickersData(
         add_feature_cols_func=p_add_features_v1,
         tickers=tickers_all,
-        required_feature_cols=required_feature_columns,
-        recreate_features_every_time=True,
-        # NOTE If recreate_features_every_time=False,
+        recreate_columns_every_time=True,
+        # NOTE If recreate_columns_every_time=False,
         # atr_multiplier_threshold optimization won't work
     )
 

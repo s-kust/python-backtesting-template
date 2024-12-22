@@ -27,13 +27,11 @@ if __name__ == "__main__":
     # This data is stored in the TickersData class instance
     # as a dictionary whose keys are tickers and values ​are DFs.
 
-    # For more details, see the class TickersData internals,
+    # For more details, see the class TickersData internals
     # and the add_features_v1_basic function.
-    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
     tickers_data = TickersData(
         tickers=tickers_all,
         add_feature_cols_func=add_features_v1_basic,
-        required_feature_cols=required_feature_columns,
     )
 
     # Now add forward returns column fwd_ret_4 to analyze it

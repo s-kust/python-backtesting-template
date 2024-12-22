@@ -8,6 +8,9 @@ REQUIRED_DERIVATIVE_COLUMNS_F_V1_BASIC = {"atr_14", f"ma_{MOVING_AVERAGE_N}"}
 
 
 def add_required_cols_for_f_v1_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Ensure that every column listed in REQUIRED_DERIVATIVE_COLUMNS_F_V1_BASIC is present in the DF
+    """
     df_columns = df.columns
     internal_df = df.copy()
     if f"ma_{MOVING_AVERAGE_N}" not in df_columns:
@@ -65,8 +68,5 @@ def add_features_v1_basic(
     res["feature_advanced"] = (res["ma_200"] - res["Close"]) >= (
         res["atr_14"] * atr_multiplier_threshold
     )
-
-    # enlist the columns created above in required_feature_columns,
-    # see run_fwd_ret_analysis_ma_200.py
 
     return res
