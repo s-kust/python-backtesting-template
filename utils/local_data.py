@@ -26,10 +26,11 @@ class TickersData:
     # Practice has shown that it is advisable to maintain raw OHLC data,
     # as well as data with added derivative columns and features, in separate files.
     # You'll see the code saves single_raw_XXX.xlsx and single_with_features_XXX.xlsx files.
+
     # You will often change derived columns and features.
     # In such cases, you only need to delete single_with_features_XXX.xlsx files
     # so that the system creates derivative columns and features again.
-    # And you won't have to request the raw OHLC data from the provider again.
+    # And it won't have to request the raw OHLC data from the provider again.
 
     def __init__(
         self,
@@ -116,15 +117,6 @@ class TickersData:
             ticker=ticker, data_type="with_features"
         )
 
-        if self.recreate_columns_every_time is False:
-            if (
-                os.path.exists(self.filename_with_features)
-                and os.path.getsize(self.filename_with_features) > 0
-            ):
-                df = pd.read_excel(self.filename_with_features, index_col=0)
-                print(f"Reading {self.filename_with_features} - OK")
-                return df
-
         # if self.recreate_columns_every_time is True -
         # don't use locally cached derived columns,
         # recreate them every time,
@@ -135,12 +127,28 @@ class TickersData:
         # in order to optimize these parameters.
         # See also the run_strategy_main_optimize.py file.
 
+        if self.recreate_columns_every_time is False:
+            if (
+                os.path.exists(self.filename_with_features)
+                and os.path.getsize(self.filename_with_features) > 0
+            ):
+                df = pd.read_excel(self.filename_with_features, index_col=0)
+                print(f"Reading {self.filename_with_features} - OK")
+                return df
+
+        # self.recreate_columns_every_time is True
+        # or failed to get data from self.filename_with_features
+
         self.filename_raw = get_local_ticker_data_file_name(
             ticker=ticker, data_type="raw"
         )
         res = self._read_raw_data_from_xlsx()
         if res is not None:
             return res
+
+        # self.recreate_columns_every_time is True
+        # or failed to get data from self.filename_with_features
+        # and failed to get data from self.filename_raw
 
         return self._import_data_from_external_provider(ticker=ticker)
 
