@@ -1,5 +1,6 @@
 import pandas as pd
 
+from constants import FEATURE_COL_NAME_ADVANCED, FEATURE_COL_NAME_BASIC
 from derivative_columns.atr import add_atr_col_to_df
 from derivative_columns.ma import add_moving_average
 
@@ -53,19 +54,23 @@ def add_features_v1_basic(
 
     # Customize below
 
-    res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
+    res[FEATURE_COL_NAME_BASIC] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
 
-    # NOTE
+    # NOTE 1
     # At first, a “quick and dirty” analysis of forward returns
     # by feature_basic True and False was launched.
     # See details in README.MD and in run_fwd_return_analysis.py.
 
-    # feature_advanced is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
+    # NOTE 2
+    # You may want to skip creating FEATURE_COL_NAME_ADVANCED,
+    # limiting yourself to just FEATURE_COL_NAME_BASIC.
+
+    # FEATURE_COL_NAME_ADVANCED is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
     # It turned out that under these conditions,
     # in subsequent several days, returns are much higher than usually.
     # As an educational example, we launch backtests to check
     # whether this feature is worth using as a signal to take a long position.
-    res["feature_advanced"] = (res["ma_200"] - res["Close"]) >= (
+    res[FEATURE_COL_NAME_ADVANCED] = (res["ma_200"] - res["Close"]) >= (
         res["atr_14"] * atr_multiplier_threshold
     )
 

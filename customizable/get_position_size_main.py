@@ -1,8 +1,10 @@
+# pylint: disable=W0212
+# pylint: disable=C0121
 from typing import Optional, Tuple
 
 from backtesting.backtesting import Strategy
 
-from constants import DPS_STUB
+from constants import DPS_STUB, FEATURE_COL_NAME_ADVANCED
 from utils.strategy_exec.misc import get_current_position_size
 
 
@@ -77,9 +79,9 @@ def get_desired_current_position_size(
         desired_position_size = current_position_size
         return desired_position_size, current_position_size, DPS_STUB
 
-    # NOTE see details of feature_advanced
+    # NOTE see details of FEATURE_COL_NAME_ADVANCED
     # inside the add_features_v1_basic function
-    if strategy._data.feature_advanced[-1] == True:
+    if strategy._data[FEATURE_COL_NAME_ADVANCED][-1] == True:
         desired_position_size = 1.0
     # otherwise, it remains None, i.e. signal do nothing
 
