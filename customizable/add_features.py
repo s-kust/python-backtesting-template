@@ -37,13 +37,13 @@ def add_features_v1_basic(
     # moving average (ma_200) and Average True Range (atr_14),
     # Feature_basic and feature_advanced the features created based on them.
 
-    MOVING_AVERAGE_N = 200
+    moving_average_n = 200
 
     # add ma_200 column
-    res = add_moving_average(df=res, n=MOVING_AVERAGE_N)
+    res = add_moving_average(df=res, n=moving_average_n)
 
     res["atr_14"] = res["tr"].rolling(14).mean()
-    res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
+    res["feature_basic"] = res["Close"] < res[f"ma_{moving_average_n}"]
 
     # NOTE
     # At first, a “quick and dirty” analysis of forward returns

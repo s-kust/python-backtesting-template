@@ -6,7 +6,7 @@ import pandas as pd
 
 from constants import tickers_all
 from customizable import add_features_v1_basic
-from utils.atr import add_tr_delta_col_to_ohlc
+from derivative_columns.atr import add_tr_delta_col_to_ohlc
 
 from .import_data import get_local_ticker_data_file_name, import_alpha_vantage_daily
 
@@ -57,11 +57,11 @@ class TickersData:
                 ticker=ticker
             )
 
-    def _check_all_required_feature_columns_in_df(self, df: pd.DataFrame):
+    def _check_all_required_feature_columns_in_df(self, df: pd.DataFrame) -> None:
         for col_name in self.required_feature_cols:
             if col_name in df.columns:
                 continue
-            error_msg = f"get_df_with_features: no column {col_name} in DF after calling {self.add_feature_cols_func.__name__}"
+            error_msg = f"get_df_with_features: no column {col_name} in DF after calling {self.add_feature_cols_func.__name__}"  # pylint: disable=C0301
             raise ValueError(error_msg)
 
     def get_df_with_features(self, ticker: str) -> pd.DataFrame:
@@ -126,7 +126,7 @@ class TickersData:
         )
         df = self.import_ohlc_func(ticker=ticker)
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:
-            error_msg = f"get_df_with_features: failed call of {self.import_ohlc_func} for {ticker=}, returned {df=}"
+            error_msg = f"get_df_with_features: failed call of {self.import_ohlc_func} for {ticker=}, returned {df=}"  # pylint: disable=C0301
             raise RuntimeError(error_msg)
         df.to_excel(filename_raw)
         df = add_tr_delta_col_to_ohlc(ohlc_df=df)

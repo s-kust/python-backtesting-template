@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .misc import ensure_df_has_all_required_columns
+from utils.misc import ensure_df_has_all_required_columns
 
 
 def add_atr_col_to_df(
