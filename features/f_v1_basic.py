@@ -1,15 +1,34 @@
 import pandas as pd
 
+from derivative_columns.atr import add_atr_col_to_df
 from derivative_columns.ma import add_moving_average
+
+MOVING_AVERAGE_N = 200
+REQUIRED_DERIVATIVE_COLUMNS_F_V1_BASIC = {"atr_14", f"ma_{MOVING_AVERAGE_N}"}
+
+
+def add_required_cols_for_f_v1_basic(df: pd.DataFrame) -> pd.DataFrame:
+    df_columns = df.columns
+    internal_df = df.copy()
+    if f"ma_{MOVING_AVERAGE_N}" not in df_columns:
+        internal_df = add_moving_average(df=internal_df, n=MOVING_AVERAGE_N)
+    if "atr_14" not in df_columns:
+        if "tr" in df_columns:
+            internal_df["atr_14"] = internal_df["tr"].rolling(14).mean()
+        else:
+            internal_df = add_atr_col_to_df(df=internal_df, n=14, exponential=False)
+    return internal_df
 
 
 def add_features_v1_basic(
     df: pd.DataFrame, atr_multiplier_threshold: int = 6
 ) -> pd.DataFrame:
+    """
+    First make sure that all necessary derived columns are present.
+    After that, add features_v1_basic columns.
+    """
 
     # NOTE 1.
-    # You can have multiple similar functions
-    # with different sets of features and forecasts.
     # The function must be passed as a add_feature_cols_func parameter
     # when creating an instance of the TickersData class.
     # See the examples in the files run_fwd_return_analysis.py,
@@ -23,27 +42,15 @@ def add_features_v1_basic(
     # functools.partial is used for that.
     # See the example in the run_strategy_main_optimize.py file.
 
-    # NOTE 3.
-    # You already have tr (True Range) column in input DF.
-    # For adding Average True Range, consider something like this:
-    # res['atr_14'] = res['tr'].rolling(14).mean()
-
     res = df.copy()
+
+    for col in REQUIRED_DERIVATIVE_COLUMNS_F_V1_BASIC:
+        if col not in res.columns:
+            res = add_required_cols_for_f_v1_basic(df=res)
 
     # Customize below
 
-    # NOTE
-    # In the following example, the derived columns are
-    # moving average (ma_200) and Average True Range (atr_14),
-    # Feature_basic and feature_advanced the features created based on them.
-
-    moving_average_n = 200
-
-    # add ma_200 column
-    res = add_moving_average(df=res, n=moving_average_n)
-
-    res["atr_14"] = res["tr"].rolling(14).mean()
-    res["feature_basic"] = res["Close"] < res[f"ma_{moving_average_n}"]
+    res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
 
     # NOTE
     # At first, a “quick and dirty” analysis of forward returns
