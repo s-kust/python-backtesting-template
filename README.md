@@ -156,8 +156,6 @@ The class includes a `get_data` function that returns a ticker's DataFrame. It c
 
 See also `run_strategy_main_simple.py` file for how to instantiate the `TickersData` class.
 
-*Modified 22.12.2024*: The OHLC data must include the necessary derived columns to create features. Previously, the `TickersData` class handled it, but now this responsibility has been shifted to the functions that generate features. If a function cannot find the required derived columns, it should call other functions to add them. For an example, refer to the `/features/f_v1_basic.py` file.
-
 ## Optimizing Input Parameters for Feature Creation Functions
 
 Your function for creating derived columns and features will likely have some input parameters. You may want to optimize them. The `run_strategy_main_optimize.py` file demonstrates how to do it.
@@ -548,6 +546,6 @@ See also my repo devoted to [Anchored VWAPS](https://github.com/s-kust/anchored_
 *22.12.2024.*
 
 1. In the `run_fwd_return_analysis.py` file, the testing is now performed not for a single number of days, but for a specified range.
-2. The OHLC data must include the necessary derived columns to create features. Previously, the `TickersData` class handled it, but now this responsibility has been shifted to the functions that generate features. If a function cannot find the required derived columns, it should call other functions to add them. For an example, refer to the `/features/f_v1_basic.py` file.
-3. The long and complicated function `get_df_with_features` has been split into several smaller functions.
+2. The OHLC data must include the necessary *derived columns* to create *features*. Previously, the `TickersData` class handled it, but now this responsibility has been shifted to the functions that generate features. If a function cannot find the required derived columns, it should call other functions to add them. For an example, refer to the `/features/f_v1_basic.py` file.
+3. The long and bulky function `get_df_with_features` has been split into several smaller functions.
 
