@@ -1,5 +1,10 @@
 # python-backtesting-template
-Trading strategy template that uses Python `backtesting` library. It lets you focus on improving your price forecasts and reduces the time and effort spent on auxiliary tasks.
+This repository allows to simplify and enhance testing of the trading signals you develop. While it leverages a popular Python `backtesting` plugin, it offers significantly more features.
+
+Suggested Workflow:
+1. **Statistical Testing**. Start with a quick test of your trading signal using the `run_fwd_return_analysis.py` file as a reference.
+2. **Backtesting**. If the statistical test yields promising results, prepare and execute a backtest using the `run_strategy_main_simple.py` file as a guide.
+3. **Strategy Optimization**. Optimize your trading strategy parameters, such as the maximum trade duration, profit target, stop loss, etc. Refer to the `run_strategy_main_optimize.py` file for instructions on how to do it.
 
 # Understanding the Benefits of This Repo
 
@@ -33,15 +38,15 @@ Although everything written below may seem complicated, you will quickly underst
 
 Let's assume you have a trading signal in mind and want to test whether it is worthwhile for real-world trading.
 
-First, you create the necessary derived columns and one or more features based on them in the `\customizable\add_features.py` file. Derived columns might include metrics such as trend slope, moving average, average true range (ATR), RSI, and others.
+First, you create the necessary *derived columns* and one or more *features* based on them. Derived columns might include metrics such as trend slope, moving average, average true range (ATR), RSI, and others. Examples of functions that generate derived columns are available in the `/derivative_columns/` folder. For an example of a function that creates a Boolean feature column, refer to the `/features/f_v1_basic.py` file.
 
-The next step is to run a quick analysis to see how returns in the following days relate to today's values of your features. The file `run_fwd_return_analysis.py` shows how to do it, with detailed explanations in the code. 
+The next step is to run a quick analysis to see how returns in the following days relate to today's values of your features. The file `run_fwd_return_analysis.py` shows how to do it, with detailed explanations in this document below and in the code. 
 
 If your feature is continuous, you can split it into groups and run the `analyze_values_by_group` function. This step is optional. The function `get_ma_200_relation_label` is an example of partitioning into groups and assigning labels to groups.
 
 Also, you could regress the future returns on your continuous feature, though there isn’t an example of such a regression in the `run_fwd_return_analysis.py` file yet.
 
-If the preliminary analysis suggests that your trading signal warrants further testing, you can set up backtests.
+In most cases, statistical tests will reveal that your trading signals are not viable for practical use, particularly when factoring in brokerage commissions and spreads. If the preliminary analysis suggests that your trading signal warrants further testing, you can set up backtests.
 
 It includes the following steps:
 
@@ -65,9 +70,15 @@ Please note that the file `output.xlsx` is created only if the number of tickers
 
 # Preliminary Analysis Before Running Backtests
 
-A preliminary analysis includes adding a column for forward returns (`fwd_ret_NUM_DAYS`), representing the returns for the next few days. To accomplish this, call the `add_fwd_ret` function and pass the OHLC DataFrame along with the desired number of days as parameters. After adding the column, you can analyze how these returns vary based on the specified conditions.
+The first step is implementing your trading signal as a **feature**—a Boolean column indicating whether one or more conditions are met on a given day. You can design these conditions using **derived columns** such as moving averages, average true range, and similar metrics. For examples, refer to the `/features/f_v1_basic.py` file and `/derivative_columns/` folder.
 
-To conduct the analysis, you'll require statistical methods for hypothesis testing and confidence interval calculation. This repository employs **bootstrapping** instead of traditional parametric methods, such as Student's t-test. The `get_bootstrapped_mean_ci` function handles the core calculations. If you are not familiar with bootstrapping, take some time to learn about it before diving into the function's code.
+Before running backtests, start with a quick statistical test to evaluate how significantly the returns differ in subsequent days after the feature value is `True` and `False`. If the differences in returns are minimal, skip preparing and running the backtests.
+
+Sometimes, the returns after `True` and `False` days differ significantly but in the opposite direction of what you expected. For example, a trading signal you intended to use for long positions might work better for entering short trades or vice versa.
+
+**Warning**: Evaluating the test results requires a deep understanding of statistics.
+
+This repository employs **bootstrapping** instead of traditional parametric methods, such as Student's t-test. The `get_bootstrapped_mean_ci` function handles the core calculations. If you are not familiar with bootstrapping, take some time to learn about it before diving into the function's code.
 
 The file `run_fwd_return_analysis.py` provides a comprehensive working example of the preliminary analysis. You will find a detailed explanation of its code in the "A Real-Life Example" section below.
 
@@ -109,7 +120,7 @@ No API key is required for requests to Yahoo Finance. However, this provider onl
 
 # Local Data Caching with Excel Files
 
-The system saves local copies of data in Excel files. It stores “raw” data and also data with added derivative columns and features. 
+The system saves local copies of data in Excel files. It stores “raw” data and also data with added *derived columns* and *features*. 
 
 Template for naming a file with raw data: `single_raw_TICKER.xlsx`. Template for naming a file with data and added columns: `single_with_features_TICKER.xlsx`. 
 
@@ -123,7 +134,7 @@ The class `TickersData` carries the work with Excel cache files. This class is d
 
 The `TickersData` class performs the following tasks:
 1. It retrieves "raw" daily OHLC data for each ticker from an external provider.
-2. It calls the function you created in the `\customizable\add_features.py` file to add derived columns and features.
+2. It calls the `add_feature_cols_func` function to add *derived columns* and *features*.
 3. It generates and stores a dictionary with tickers as keys and Pandas DataFrames as values.
 4. It saves local Excel cache files, as described above.
 
@@ -143,7 +154,9 @@ def run_all_tickers(
 
 The class includes a `get_data` function that returns a ticker's DataFrame. It contains OHLC data, derived columns, and features. Take a couple of minutes to examine its code. 
 
-See also `run_strategy_main_simple.py` file for how to instantiate the `TickersData` class. Note the `required_feature_columns` parameter. It is a set where you should list all derived columns and features.
+See also `run_strategy_main_simple.py` file for how to instantiate the `TickersData` class.
+
+*Modified 22.12.2024*: The OHLC data must include the necessary derived columns to create features. Previously, the `TickersData` class handled it, but now this responsibility has been shifted to the functions that generate features. If a function cannot find the required derived columns, it should call other functions to add them. For an example, refer to the `/features/f_v1_basic.py` file.
 
 ## Optimizing Input Parameters for Feature Creation Functions
 
@@ -214,19 +227,43 @@ The study utilized daily OHLC data from twelve popular ETFs listed in the `ticke
 
 ## Preliminary Analysis
 
-The file `customizable/add_features.py` contains a function called `add_features_v1_basic` intended to serve as an example and source of inspiration. This function includes the following code snippet, which adds a 200-day moving average and a 14-day Average True Range (ATR).
+The file `features/f_v1_basic.py` contains a function called `add_features_v1_basic` intended to serve as an example and source of inspiration. 
+
+The feature evaluates to `True` if today's closing price is below the 200-day simple moving average.
+
+``` python
+res[FEATURE_COL_NAME_BASIC] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
+
+``` 
+
+Also, we create one more "advanced" feature there. It evaluates to `True` only if today's closing price is *significantly* lower than the 200-day moving average.
+
+``` python
+    res[FEATURE_COL_NAME_ADVANCED] = (res["ma_200"] - res["Close"]) >= (
+        res["atr_14"] * atr_multiplier_threshold
+    )
+``` 
+
+To create these features, we need the following derived columns: average true range and 200-day moving average. If the DataFrame lacks these columns, the system must call the functions that add them.
 
 ``` python
 MOVING_AVERAGE_N = 200
-# add ma_200 column
-res = add_moving_average(df=res, n=MOVING_AVERAGE_N)
-res["atr_14"] = res["tr"].rolling(14).mean()
-``` 
+REQUIRED_DERIVATIVE_COLUMNS_F_V1_BASIC = {"atr_14", f"ma_{MOVING_AVERAGE_N}"}
 
-Next, a simple Boolean feature is created based on the 200-day moving average.
-
-``` python
-res["feature_basic"] = res["Close"] < res[f"ma_{MOVING_AVERAGE_N}"]
+def add_required_cols_for_f_v1_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Ensure that every column listed in REQUIRED_DERIVATIVE_COLUMNS_F_V1_BASIC is present in the DF
+    """
+    df_columns = df.columns
+    internal_df = df.copy()
+    if f"ma_{MOVING_AVERAGE_N}" not in df_columns:
+        internal_df = add_moving_average(df=internal_df, n=MOVING_AVERAGE_N)
+    if "atr_14" not in df_columns:
+        if "tr" in df_columns:
+            internal_df["atr_14"] = internal_df["tr"].rolling(14).mean()
+        else:
+            internal_df = add_atr_col_to_df(df=internal_df, n=14, exponential=False)
+    return internal_df
 ``` 
 
 A slightly more advanced preliminary analysis was also conducted. This approach involved splitting each ticker's data into several discrete groups based on the distance between the closing price and the 200-day moving average. After that, for each group, you can calculate and compare average returns over the next few days.
@@ -253,68 +290,43 @@ The following paragraphs provide an explanation of how the code in the `run_fwd_
 First, create an instance of the `TickersData` class, as detailed above. This instance will act as a data source for all following operations.
 
 ``` python
-required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
 tickers_data = TickersData(
     tickers=tickers_all,
     add_feature_cols_func=add_features_v1_basic,
-    required_feature_cols=required_feature_columns,
 )
 ``` 
 
-After that, add the forward returns column `fwd_ret_4` to analyze it. 
+Let's say today the feature value is `True`. We want to assess:
+
+1. The strength of its influence on returns in the following days.
+2. The duration of the effect. 
+
+To do this, we sequentially run checks for different periods (e.g., 1 day, 2 days, 3 days, etc.). After that, the system generates a DataFrame containing all the gathered data.
 
 ``` python
-# NOTE We don't need forward returns to run backtests,
-# so we add them only here,
-# not inside the TickersData class or anywhere else.
-for ticker in tickers_data.tickers_data_with_features:
-    tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
-        ohlc_df=tickers_data.tickers_data_with_features[ticker], num_days=4
-    )
+    res: List[dict] = list()
+    FWD_RETURN_DAYS_MAX = 16
+    for fwd_return_days in range(2, FWD_RETURN_DAYS_MAX + 1):
+        print(
+            f"Now check for fwd returns {fwd_return_days} days - up to {FWD_RETURN_DAYS_MAX}"
+        )
+        res = _check_feature_for_fwd_ret_days(
+            tickers_data=tickers_data_instance,
+            res_to_return=res,
+            fwd_ret_days=fwd_return_days,
+            insert_empty_row=True,
+            feature_col_name=FEATURE_COL_NAME_BASIC,
+        )
+    df = pd.DataFrame(res)
 ``` 
 
-For details, see the internals of the `add_fwd_ret` function.
-
-Now we apply the `get_ma_200_relation_label` function to each OHLC row and create a big combined DataFrame. 
-
-``` python    
-    # Add a column with a group label
-    # and concatenate the DFs of all tickers into one large DF.
-    combined_ohlc_all = pd.DataFrame()
-    for ticker in tickers_data.tickers_data_with_features:
-        df = tickers_data.tickers_data_with_features[ticker]
-        df[GROUP_COL_NAME] = df.apply(get_ma_200_relation_label, axis=1)
-        
-        # NOTE 
-        # You must still create combined_ohlc_all, 
-        # even if you don't plan to split the data into groups.
-        combined_ohlc_all = pd.concat([combined_ohlc_all, df])
-    
-    combined_ohlc_all = combined_ohlc_all.dropna()
-```
-
-The following code performs a basic analysis.
-
-``` python    
-       res = dict()
-    res["CLOSE_BELOW_MA_200"] = get_bootstrapped_mean_ci(
-        data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == True]["fwd_ret_4"]
-        .dropna()
-        .values
-    )
-    res["CLOSE_ABOVE_MA_200"] = get_bootstrapped_mean_ci(
-        data=combined_ohlc_all[combined_ohlc_all["feature_basic"] == False]["fwd_ret_4"]
-        .dropna()
-        .values
-    )
-    pd.DataFrame(res).T.to_excel(EXCEL_FILE_NAME_SIMPLE) 
-```
+The `_check_feature_for_fwd_ret_days` function includes detailed comments within its code.
 
 Result:
 
 ![Returns above and below 200-days simple moving average](./img/above_below_ma_200.PNG)
 
-Now, it becomes clear that the notion that nothing good ever happens below the 200-day moving average is a misconception. However, the data we've gathered isn't sufficient to identify the conditions under which buying the dip is advisable. Would analyzing the data split into groups help with it?
+It is now clear that the idea that nothing good ever happens below the 200-day moving average is a misconception. However, the data we've gathered isn't sufficient to identify the conditions under which buying the dip is advisable. Would analyzing the data split into groups help with it?
 
 ``` python 
     # NOTE This is for convenient sorting of rows
@@ -346,7 +358,7 @@ The average returns in the HIGHLY_BELOW group were significantly higher than in 
 
 ## Running Backtests with One Set of Parameter Values
 
-First of all, you need to create the corresponding feature.
+First of all, you need to create the corresponding feature as described above.
 
 ``` python 
     def add_features_v1_basic(
@@ -356,7 +368,7 @@ First of all, you need to create the corresponding feature.
     ...
 
     # feature_advanced is a HIGHLY_BELOW group of the get_ma_200_relation_label function.
-    res["feature_advanced"] = (res["ma_200"] - res["Close"]) >= (
+    res[FEATURE_COL_NAME_ADVANCED] = (res["ma_200"] - res["Close"]) >= (
         res["atr_14"] * atr_multiplier_threshold
     )
 ```
@@ -374,8 +386,8 @@ If the current position is zero and `feature_advanced` is `True`, enter a 100% l
         desired_position_size = current_position_size
         return desired_position_size, current_position_size, DPS_STUB
     
-    if strategy._data.feature_advanced[-1] == True:
-        desired_position_size = 1.0
+    if strategy._data[FEATURE_COL_NAME_ADVANCED][-1] == True:
+    desired_position_size = 1.0
     # otherwise, it remains None, i.e. signal do nothing
 
     return desired_position_size, current_position_size, DPS_STUB
@@ -432,7 +444,7 @@ Now, let’s examine the `run_strategy_main_optimize.py` file. In this file, the
 
 ## Feature Creation Optimization: Fine-Tuning Parameters
 
-You’ll create a function to add derived columns and features to your data. Its recommended location is in the `\customizable\add_features.py` file. In the example provided, this function is called `add_features_v1_basic`. It has one input parameter, `atr_multiplier_threshold`. Your custom function will likely have one or more input parameters as well. You may want to optimize them for the best results.
+You’ll create a function to add derived columns and features to your data. Its recommended location is in the `\features\` folder. In the example provided, this function is called `add_features_v1_basic`. It has one input parameter, `atr_multiplier_threshold`. Your custom function will likely have one or more input parameters as well. You may want to optimize them for the best results.
 
 When creating a `TickersData` instance, the system calls a function to add features. You specify this function through the `add_feature_cols_func` parameter. However, you can’t directly pass input parameter values. The solution is to use `functools.partial`, as shown in the example below.
 
@@ -443,11 +455,9 @@ When creating a `TickersData` instance, the system calls a function to add featu
     p_add_features_v1 = partial(
         add_features_v1_basic, atr_multiplier_threshold=atr_multiplier_threshold
     )
-    required_feature_columns = {"ma_200", "atr_14", "feature_basic", "feature_advanced"}
     tickers_data = TickersData(
         add_feature_cols_func=p_add_features_v1,
-        tickers=tickers_all,
-        required_feature_cols=required_feature_columns,
+        tickers=tickers_all,     
         recreate_features_every_time=True
         # NOTE If recreate_features_every_time=False,
         # atr_multiplier_threshold optimization won't work
@@ -532,3 +542,12 @@ This repository contains a substantial amount of Python code. Unfortunately, its
 You can follow me on [Twitter](https://x.com/kust1983) and connect with me on [LinkedIn](https://www.linkedin.com/in/kushchenko/).
 
 See also my repo devoted to [Anchored VWAPS](https://github.com/s-kust/anchored_vwaps).
+
+# Changelog
+
+*22.12.2024.*
+
+1. In the `run_fwd_return_analysis.py` file, the testing is now performed not for a single number of days, but for a specified range.
+2. The OHLC data must include the necessary derived columns to create features. Previously, the `TickersData` class handled it, but now this responsibility has been shifted to the functions that generate features. If a function cannot find the required derived columns, it should call other functions to add them. For an example, refer to the `/features/f_v1_basic.py` file.
+3. The long and complicated function `get_df_with_features` has been split into several smaller functions.
+

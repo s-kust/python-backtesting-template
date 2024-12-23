@@ -53,13 +53,13 @@ def _check_feature_for_fwd_ret_days(
             [combined_df_all, tickers_data.tickers_data_with_features[ticker]]
         )
 
+    # Filter returns on days when the feature value is True and False,
+    # so that we can compare them.
     mask_feature_true = combined_df_all[feature_col_name] == True
     mask_feature_false = combined_df_all[feature_col_name] == False
-
     returns_f_true = (
         combined_df_all[mask_feature_true][f"fwd_ret_{fwd_ret_days}"].dropna().values
     )
-
     returns_f_false = (
         combined_df_all[mask_feature_false][f"fwd_ret_{fwd_ret_days}"].dropna().values
     )
@@ -68,6 +68,9 @@ def _check_feature_for_fwd_ret_days(
     for ticker in tickers_data.tickers_data_with_features:
         del tickers_data.tickers_data_with_features[ticker][f"fwd_ret_{fwd_ret_days}"]
 
+    # Finding the mean and confidence intervals for returns.
+    # The get_bootstrapped_mean_ci function also returns the sample size
+    # and the percentage of days where the results are positive.
     res_f_true = get_bootstrapped_mean_ci(
         data=returns_f_true, conf_level=DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL  # type: ignore
     )
