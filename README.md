@@ -46,7 +46,11 @@ If your feature is continuous, you can split it into groups and run the `analyze
 
 Also, you could regress the future returns on your continuous feature, though there isn’t an example of such a regression in the `run_fwd_return_analysis.py` file yet.
 
-In most cases, statistical tests will reveal that your trading signals are not viable for practical use, particularly when factoring in brokerage commissions and spreads. If the preliminary analysis suggests that your trading signal warrants further testing, you can set up backtests.
+In most cases, statistical tests will reveal that your trading signals are not viable for practical use, particularly when factoring in brokerage commissions and spreads. 
+
+<img src="https://github.com/s-kust/python-backtesting-template/blob/main/img/trading_test.png" />
+
+If the preliminary analysis suggests that your trading signal warrants further testing, you can set up backtests.
 
 It includes the following steps:
 
