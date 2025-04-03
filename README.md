@@ -6,6 +6,8 @@ Suggested Workflow:
 2. **Backtesting**. If the statistical test yields promising results, prepare and execute a backtest using the `run_strategy_main_simple.py` file as a guide.
 3. **Strategy Optimization**. Optimize your trading strategy parameters, such as the maximum trade duration, profit target, stop loss, etc. Refer to the `run_strategy_main_optimize.py` file for instructions on how to do it.
 
+<img src="https://github.com/s-kust/python-backtesting-template/blob/main/img/workflow.png" />
+
 # Understanding the Benefits of This Repo
 
 Just like with the original Python `backtesting` package, you can obtain and use `stats`, `trades`, and interactive charts in HTML files. In addition, this repository solves many problems that the `backtesting` library does not solve.
