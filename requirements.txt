@@ -1,4 +1,5 @@
 backtesting
 scipy
 pandas
+pytest
 yfinance
