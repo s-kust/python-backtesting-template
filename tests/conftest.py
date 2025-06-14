@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock
 
+import numpy as np
 import pandas as pd
 import pytest
 import pytest_mock
@@ -80,11 +81,93 @@ def single_row_df() -> pd.DataFrame:
 
 
 @pytest.fixture
+def series_for_ma_tests() -> pd.Series:
+    """A simple series for testing moving average calculations."""
+    return pd.Series([10.0, 12.0, 14.0, 16.0, 18.0, 20.0])
+
+
+@pytest.fixture
+def series_with_nans() -> pd.Series:
+    """A series with NaN values for testing moving average calculations."""
+    return pd.Series([np.nan, 10.0, 12.0, np.nan, 14.0, 16.0])
+
+
+@pytest.fixture
+def df_all_gains() -> pd.DataFrame:
+    """DataFrame with prices consistently increasing (RSI should be 100)."""
+    data = {
+        "Date": pd.to_datetime(
+            [
+                "2023-01-01",
+                "2023-01-02",
+                "2023-01-03",
+                "2023-01-04",
+                "2023-01-05",
+                "2023-01-06",
+                "2023-01-07",
+                "2023-01-08",
+                "2023-01-09",
+                "2023-01-10",
+            ]
+        ),
+        "Close": [10, 12, 14, 16, 18, 20, 22, 24, 26, 28],
+    }
+    return pd.DataFrame(data).set_index("Date")
+
+
+@pytest.fixture
+def df_all_losses() -> pd.DataFrame:
+    """DataFrame with prices consistently decreasing (RSI should be 0)."""
+    data = {
+        "Date": pd.to_datetime(
+            [
+                "2023-01-01",
+                "2023-01-02",
+                "2023-01-03",
+                "2023-01-04",
+                "2023-01-05",
+                "2023-01-06",
+                "2023-01-07",
+                "2023-01-08",
+                "2023-01-09",
+                "2023-01-10",
+            ]
+        ),
+        "Close": [28, 26, 24, 22, 20, 18, 16, 14, 12, 10],
+    }
+    return pd.DataFrame(data).set_index("Date")
+
+
+@pytest.fixture
+def df_constant_prices() -> pd.DataFrame:
+    """DataFrame with prices remaining constant."""
+    data = {
+        "Date": pd.to_datetime(
+            [
+                "2023-01-01",
+                "2023-01-02",
+                "2023-01-03",
+                "2023-01-04",
+                "2023-01-05",
+                "2023-01-06",
+                "2023-01-07",
+                "2023-01-08",
+                "2023-01-09",
+                "2023-01-10",
+            ]
+        ),
+        "Close": [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+    }
+    return pd.DataFrame(data).set_index("Date")
+
+
+@pytest.fixture
 def mock_add_atr_col_to_df(mocker: pytest_mock.plugin.MockerFixture) -> MagicMock:
     """
     Mock the add_atr_col_to_df function to control its behavior in tests.
     """
-    # NOTE don't worry about the mocker argument, it magically works - https://stackoverflow.com/a/72943495/3139228
+    # NOTE don't worry about the mocker argument,
+    # it magically works - https://stackoverflow.com/a/72943495/3139228
 
     # Use mocker from pytest-mock to patch the function within the min_max module
     return mocker.patch("derivative_columns.min_max.add_atr_col_to_df")
