@@ -1,5 +1,3 @@
-from typing import Callable
-
 import mock
 import pandas as pd
 import pytest
@@ -58,7 +56,7 @@ def test_initial_validation_rsi_period_less_than_2(
 
 @pytest.mark.unit
 def test_initial_validation_valid_inputs(spy_df_daily: pd.DataFrame) -> None:
-    """Test validation with valid inputs (should not raise an error)."""
+    """Test validation with valid inputs, should not raise an error."""
     try:
         _add_rsi_col_initial_validation(
             df=spy_df_daily, col_name="Close", ma_type="simple"
