@@ -12,6 +12,29 @@ from derivative_columns.min_max import (
 
 
 @pytest.mark.unit
+def test_fill_is_min_max_empty_df(empty_df: pd.DataFrame) -> None:
+    df = _ensure_required_cols_min_max_in_df(df=empty_df)
+    result_df = _fill_is_min_max(df, col_name="Close", atr_smoothing_n=14)
+    # Check if all columns are added and empty with correct dtypes
+    expected_cols = [
+        "atr_14",
+        "is_min",
+        "is_max",
+        "last_known_min_date",
+        "last_known_max_date",
+        "prev_known_min_date",
+        "prev_known_max_date",
+        "last_known_min_val",
+        "last_known_max_val",
+        "prev_known_min_val",
+        "prev_known_max_val",
+    ]
+    assert all(col in result_df.columns for col in expected_cols)
+    assert result_df.empty
+    assert result_df["is_min"].dtype == bool
+
+
+@pytest.mark.unit
 def test_fill_is_min_max_simple_uptrend(basic_ohlc_df_daily: pd.DataFrame) -> None:
     """Test with data that clearly shows a continuous uptrend."""
     df = basic_ohlc_df_daily.copy()

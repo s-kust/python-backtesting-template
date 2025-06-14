@@ -99,6 +99,8 @@ def _fill_is_min_max(
     when the price has moved upwards from it
     by a distance of at least ATR * ATR_MULTIPLIER.
     """
+    if df.empty:
+        return df
     internal_df = df.copy()
     start_date, extremum_to_detect = _get_fill_is_min_max_start_data(df=internal_df)
     current_candidate = {
@@ -225,7 +227,8 @@ def add_is_min_max_dates_values(
     prev_known_max_val, prev_known_min_val,
     """
 
-    # NOTE The date columns are needed to avoid the look ahead bias when designing features.
+    # NOTE The last_known_max_date, last_known_min_date, prev_known_max_date, prev_known_min_date
+    # columns are needed to avoid the look ahead bias when designing features.
 
     internal_df = df.copy()
     internal_df = _ensure_required_cols_min_max_in_df(
