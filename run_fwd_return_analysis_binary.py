@@ -16,38 +16,7 @@ from utils.fwd_return_analysis_binary import (
 )
 from utils.local_data import TickersData
 
-
-def _check_feature_for_fwd_ret_days(
-    tickers_data: TickersData,
-    res_to_return: List[dict],
-    fwd_ret_days: int,
-    insert_empty_row: bool = True,
-) -> List[dict]:
-    """
-    Compare returns over fwd_ret_days subsequent days
-    in situations where the feature is True and False.
-    The function returns a list with dictionaries.
-    Later they will become rows in the final dataframe.
-    The function can also add an empty row
-    to make the dataframe easier to view.
-    To make this clear, see the dataframe example in the README.
-    """
-
-    combined_df_all = get_combined_df_with_fwd_ret(
-        tickers_data=tickers_data, fwd_ret_days=fwd_ret_days
-    )
-    res_to_return = add_rows_with_feature_true_and_false_to_res(
-        res_to_return=res_to_return,
-        combined_df_all=combined_df_all,
-        fwd_ret_days=fwd_ret_days,
-    )
-
-    if insert_empty_row:
-        res_to_return = insert_empty_row_to_res(
-            res=res_to_return, row_template=res_to_return[-1].copy()
-        )
-
-    return res_to_return
+INSERT_EMPTY_ROW = True
 
 
 if __name__ == "__main__":
@@ -77,12 +46,17 @@ if __name__ == "__main__":
         print(
             f"Now check for fwd returns {fwd_return_days} days - up to {FWD_RETURN_DAYS_MAX}"
         )
-        res = _check_feature_for_fwd_ret_days(
-            tickers_data=tickers_data_instance,
-            res_to_return=res,
-            fwd_ret_days=fwd_return_days,
-            insert_empty_row=True,
+        combined_df_all = get_combined_df_with_fwd_ret(
+            tickers_data=tickers_data_instance, fwd_ret_days=fwd_return_days
         )
+        res = add_rows_with_feature_true_and_false_to_res(
+            res_to_return=res,
+            combined_df_all=combined_df_all,
+            fwd_ret_days=fwd_return_days,
+        )
+        if INSERT_EMPTY_ROW:
+            res = insert_empty_row_to_res(res=res, row_template=res[-1].copy())
+
     df = pd.DataFrame(res)
     df = res_df_final_manipulations(df=df)
     EXCEL_FILE_NAME_SIMPLE = "res_ma_200_above_below.xlsx"
