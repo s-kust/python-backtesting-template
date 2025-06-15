@@ -11,6 +11,7 @@ from features.partition_groups.rsi_bounds import (
     group_order_rsi_bounds,
 )
 from utils.bootstrap import analyze_values_by_group
+from utils.fwd_return_analysis import filter_df_by_date
 from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
 
@@ -53,18 +54,6 @@ def _get_combined_df_with_fwd_ret(
     return combined_ohlc_all
 
 
-def _filter_df_by_date(
-    df: pd.DataFrame, date_threshold: str, remaining_part: str
-) -> pd.DataFrame:
-    if remaining_part not in ["above", "below"]:
-        raise ValueError(
-            f"_filter_df_by_date: {remaining_part=}, should be above or below"
-        )
-    if remaining_part == "above":
-        return df.loc[df.index >= date_threshold]
-    return df.loc[df.index < date_threshold]
-
-
 if __name__ == "__main__":
     load_dotenv()
 
@@ -101,10 +90,10 @@ if __name__ == "__main__":
         # Or, conversely, analyze older data, excluding recent periods
         # from consideration.
 
-        # combined_ohlc_group_df = _filter_df_by_date(
+        # combined_ohlc_group_df = filter_df_by_date(
         #     df=combined_ohlc_group_df,
         #     date_threshold="2023-01-01",
-        #     remaining_part="below",
+        #     remaining_part="before",
         # )
 
         analyze_values_by_group(

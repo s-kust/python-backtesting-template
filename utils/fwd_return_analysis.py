@@ -132,3 +132,18 @@ def add_rows_with_feature_true_and_false_to_res(
     res_to_return.append(res_f_false)
 
     return res_to_return
+
+
+def filter_df_by_date(
+    df: pd.DataFrame, date_threshold: str, remaining_part: str
+) -> pd.DataFrame:
+    """
+    Filter the portion of a dataframe that is before or after a specified date_threshold.
+    """
+    if remaining_part not in ["after", "before"]:
+        raise ValueError(
+            f"_filter_df_by_date: {remaining_part=}, should be after or before"
+        )
+    if remaining_part == "after":
+        return df.loc[df.index >= date_threshold]
+    return df.loc[df.index < date_threshold]
