@@ -1,9 +1,11 @@
+# pylint: disable=C0121
 from typing import List
 
 import numpy as np
 import pandas as pd
 
-from constants import DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL
+from constants import DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL, FEATURE_COL_NAME_BASIC
+from utils.bootstrap import get_bootstrapped_mean_ci
 from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
 
@@ -85,3 +87,48 @@ def get_combined_df_with_fwd_ret(
 
     # 4
     return combined_df_all
+
+
+def add_rows_with_feature_true_and_false_to_res(
+    res_to_return: List[dict], combined_df_all: pd.DataFrame, fwd_ret_days: int
+) -> List[dict]:
+    """
+    1. Form rows with feature True and False
+    2. Add them to result
+    """
+
+    # 1
+
+    # Filter returns on days when the feature value is True and False,
+    # so that we can compare them.
+    mask_feature_true = combined_df_all[FEATURE_COL_NAME_BASIC] == True
+    mask_feature_false = combined_df_all[FEATURE_COL_NAME_BASIC] == False
+    returns_f_true = (
+        combined_df_all[mask_feature_true][f"fwd_ret_{fwd_ret_days}"].dropna().values
+    )
+    returns_f_false = (
+        combined_df_all[mask_feature_false][f"fwd_ret_{fwd_ret_days}"].dropna().values
+    )
+
+    # Finding the mean and confidence intervals for returns.
+    # The get_bootstrapped_mean_ci function also returns the sample size
+    # and the percentage of days where the results are positive.
+    res_f_true = get_bootstrapped_mean_ci(
+        data=returns_f_true, conf_level=DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL  # type: ignore
+    )
+    res_f_false = get_bootstrapped_mean_ci(
+        data=returns_f_false, conf_level=DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL  # type: ignore
+    )
+
+    # Adding columns fwd_ret_days and feature
+    # to later sort the dataframe and make it easy to view
+    res_f_true["fwd_ret_days"] = res_f_false["fwd_ret_days"] = fwd_ret_days
+    res_f_true["feature"] = True
+    res_f_false["feature"] = False
+
+    # 2
+
+    res_to_return.append(res_f_true)
+    res_to_return.append(res_f_false)
+
+    return res_to_return
