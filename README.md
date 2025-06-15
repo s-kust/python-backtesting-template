@@ -2,7 +2,7 @@
 This repository allows to simplify and enhance testing of the trading signals you develop. While it leverages a popular Python `backtesting` plugin, it offers significantly more features.
 
 Suggested Workflow:
-1. **Statistical Testing**. Start with a quick test of your trading signal using the `run_fwd_return_analysis.py` file as a reference.
+1. **Statistical Testing**. Start with a quick test of your trading signal using the `run_fwd_return_analysis_binary.py` or `run_fwd_return_analysis_group.py` file as a reference.
 2. **Backtesting**. If the statistical test yields promising results, prepare and execute a backtest using the `run_strategy_main_simple.py` file as a guide.
 3. **Strategy Optimization**. Optimize your trading strategy parameters, such as the maximum trade duration, profit target, stop loss, etc. Refer to the `run_strategy_main_optimize.py` file for instructions on how to do it.
 
@@ -42,11 +42,11 @@ Let's assume you have a trading signal in mind and want to test whether it is wo
 
 First, you create the necessary *derived columns* and one or more *features* based on them. Derived columns might include metrics such as trend slope, moving average, average true range (ATR), RSI, and others. Examples of functions that generate derived columns are available in the `/derivative_columns/` folder. For an example of a function that creates a Boolean feature column, refer to the `/features/f_v1_basic.py` file.
 
-The next step is to run a quick analysis to see how returns in the following days relate to today's values of your features. The file `run_fwd_return_analysis.py` shows how to do it, with detailed explanations in this document below and in the code. 
+The next step is to run a quick analysis to see how returns in the following days relate to today's values of your features. The `run_fwd_return_analysis_binary.py` and `run_fwd_return_analysis_groups.py` files show how to do it, with detailed explanations in this document below and in the code. 
 
-If your feature is continuous, you can split it into groups and run the `analyze_values_by_group` function. This step is optional. The function `get_ma_200_relation_label` is an example of partitioning into groups and assigning labels to groups.
+If your feature is continuous, you can split it into groups and run the `analyze_values_by_group` function. This step is optional. The function `get_rsi_group_label` is an example of partitioning into groups and assigning labels to groups.
 
-Also, you could regress the future returns on your continuous feature, though there isn’t an example of such a regression in the `run_fwd_return_analysis.py` file yet.
+Also, you could regress the future returns on your continuous feature, though there isn’t an example of such a regression yet.
 
 In most cases, statistical tests will reveal that your trading signals are not viable for practical use, particularly when factoring in brokerage commissions and spreads. 
 
@@ -76,17 +76,49 @@ Please note that the file `output.xlsx` is created only if the number of tickers
 
 # Preliminary Analysis Before Running Backtests
 
-The first step is implementing your trading signal as a **feature**—a Boolean column indicating whether one or more conditions are met on a given day. You can design these conditions using **derived columns** such as moving averages, average true range, and similar metrics. For examples, refer to the `/features/f_v1_basic.py` file and `/derivative_columns/` folder.
+Before running backtests, start with a quick statistical test to evaluate how significantly the returns differ in subsequent days after the feature value is `True` and `False`. If the differences in returns are minimal, skip preparing and running the laborious backtest.
 
-Before running backtests, start with a quick statistical test to evaluate how significantly the returns differ in subsequent days after the feature value is `True` and `False`. If the differences in returns are minimal, skip preparing and running the backtests.
+Let’s explain the preliminary statistical analysis of a trading signal idea based on the Relative Strength Index (RSI). In this project’s terminology, RSI is a *derived column* calculated from OHLC data. You can use the `add_rsi_column` function as an example and a starting point for your work.
 
-Sometimes, the returns after `True` and `False` days differ significantly but in the opposite direction of what you expected. For example, a trading signal you intended to use for long positions might work better for entering short trades or vice versa.
+Once your OHLC DataFrame includes a column of RSI values, you can quickly perform two types of analysis:
+1. **Binary Feature Analysis.** Create a new Boolean column—for example, `high_RSI`—where `True` means today’s RSI is greater than 90. We call such columns *features*. Use the `add_feature_high_rsi` function as a reference. After adding the feature, configure and run the `run_fwd_return_analysis_binary.py` script. It will show how returns in subsequent days differ depending on whether this feature is `True` or `False`.
+1. **Grouped Analysis.** Assign each trading day to a group based on its RSI value. The `get_rsi_group_label` function provides an example of how to do it. After grouping the data, run the `run_fwd_return_analysis_groups.py` script to see how subsequent days returns vary across different RSI ranges.
+
+Here’s an example of the results from the group-based analysis.
+
+![RSI range groups](./img/group_res_example.PNG)
+
+As you can see, this instrument has historically rewarded buying the dips. Also, selling when the RSI was above 95 has usually worked out poorly. That said, remember that past performance does not guarantee future results.
+
+Sometimes, the returns after `True` and `False` days differ significantly but in the opposite direction of what you expected. For example, a trading signal you intended to use for long positions might work better for entering short trades or vice versa.
 
 **Warning**: Evaluating the test results requires a deep understanding of statistics.
 
 This repository employs **bootstrapping** instead of traditional parametric methods, such as Student's t-test. The `get_bootstrapped_mean_ci` function handles the core calculations. If you are not familiar with bootstrapping, take some time to learn about it before diving into the function's code.
 
-The file `run_fwd_return_analysis.py` provides a comprehensive working example of the preliminary analysis. You will find a detailed explanation of its code in the "A Real-Life Example" section below.
+## How Trading Signal Performance Evolves Over Time
+
+You can also compare how your trading signals perform in recent periods versus earlier ones. The `filter_df_by_date` function will help you with it.
+
+``` python
+def filter_df_by_date(
+    df: pd.DataFrame, date_threshold: str, remaining_part: str
+) -> pd.DataFrame:
+    """
+    Filter the portion of a dataframe that is before or after a specified date_threshold.
+    """
+    if remaining_part not in ["after", "before"]:
+        raise ValueError(
+            f"_filter_df_by_date: {remaining_part=}, should be after or before"
+        )
+    if remaining_part == "after":
+        return df.loc[df.index >= date_threshold]
+    return df.loc[df.index < date_threshold]
+```
+
+It is advisable to run preliminary statistical analysis scripts several times, passing different values ​​of the `remaining_part` parameter to this function. Save the results in different Excel files to compare them later.
+
+The files `run_fwd_return_analysis_binary.py` and `run_fwd_return_analysis_groups.py` provide comprehensive working examples of the preliminary analysis. You can also find additional explanations in the "A Real-Life Example" section below.
 
 # How Backtests Run
 
@@ -289,7 +321,7 @@ The data were divided into the following groups:
 
 For details, see the `get_ma_200_relation_label` function code.
 
-The following paragraphs provide an explanation of how the code in the `run_fwd_return_analysis.py` file operates.
+The following paragraphs provide an explanation of how the code in the `run_fwd_return_analysis_binary.py` file operates.
 
 First, create an instance of the `TickersData` class, as detailed above. This instance will act as a data source for all following operations.
 
@@ -314,17 +346,15 @@ To do this, we sequentially run checks for different periods (e.g., 1 day, 2 day
         print(
             f"Now check for fwd returns {fwd_return_days} days - up to {FWD_RETURN_DAYS_MAX}"
         )
-        res = _check_feature_for_fwd_ret_days(
-            tickers_data=tickers_data_instance,
-            res_to_return=res,
-            fwd_ret_days=fwd_return_days,
-            insert_empty_row=True,
-            feature_col_name=FEATURE_COL_NAME_BASIC,
-        )
+        ...
     df = pd.DataFrame(res)
+    ...
+    df.to_excel(EXCEL_FILE_NAME_SIMPLE, index=False)
+    print(
+        f"Analysis complete! Now you may explore the results file {EXCEL_FILE_NAME_SIMPLE}",
+        file=sys.stderr,
+    )
 ``` 
-
-The `_check_feature_for_fwd_ret_days` function includes detailed comments within its code.
 
 Result:
 
@@ -555,3 +585,7 @@ See also my repo devoted to [Anchored VWAPS](https://github.com/s-kust/anchored_
 2. The OHLC data must include the necessary *derived columns* to create *features*. Previously, the `TickersData` class handled it, but now this responsibility has been shifted to the functions that generate features. If a function cannot find the required derived columns, it should call other functions to add them. For an example, refer to the `/features/f_v1_basic.py` file.
 3. The long and bulky function `get_df_with_features` has been split into several smaller functions.
 
+*15.06.2025.*
+
+1. Refactored the scripts for preliminary statistical analysis of trading signals. Now, two dedicated scripts `run_fwd_return_analysis_binary.py` and `run_fwd_return_analysis_groups.py` perform Boolean features analysis and groups analysis.
+2. Added the `filter_df_by_date` function that allows you to compare how your trading signals perform in recent periods versus earlier ones.
