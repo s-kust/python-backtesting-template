@@ -16,6 +16,10 @@ from constants import (
 from features.f_rsi import add_feature_high_rsi
 from features.f_v1_basic import add_features_v1_basic
 from utils.bootstrap import get_bootstrapped_mean_ci
+from utils.fwd_return_analysis_binary import (
+    insert_empty_row_to_res,
+    res_df_final_manipulations,
+)
 from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
 
@@ -91,13 +95,9 @@ def _check_feature_for_fwd_ret_days(
         # create an empty row and append it to the resulting list
         # to improve the viewing experience of the resulting DataFrame
         res_f_empty = res_f_true.copy()
-        res_f_empty["feature"] = np.nan
-        res_f_empty[f"ci_left_{DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL}"] = np.nan
-        res_f_empty[f"ci_right_{DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL}"] = np.nan
-        res_f_empty["mean_val"] = np.nan
-        res_f_empty["positive_pct"] = np.nan
-        res_f_empty["count"] = np.nan
-        res_to_return.append(res_f_empty)
+        res_to_return = insert_empty_row_to_res(
+            res=res_to_return, row_template=res_f_empty
+        )
 
     return res_to_return
 
@@ -139,13 +139,7 @@ if __name__ == "__main__":
             feature_col_name=FEATURE_COL_NAME_BASIC,
         )
     df = pd.DataFrame(res)
-
-    # Manipulate with columns order for viewing convenience
-    df.insert(0, "feature", df.pop("feature"))
-    df.insert(0, "fwd_ret_days", df.pop("fwd_ret_days"))
-    df.sort_values(["fwd_ret_days", "feature"], ascending=[True, True])
-    df.loc[df["mean_val"] != df["mean_val"], "fwd_ret_days"] = np.nan
-
+    df = res_df_final_manipulations(df=df)
     df.to_excel(EXCEL_FILE_NAME_SIMPLE, index=False)
     print(
         f"Analysis complete! Now you may explore the results file {EXCEL_FILE_NAME_SIMPLE}",

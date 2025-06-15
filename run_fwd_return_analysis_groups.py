@@ -27,8 +27,7 @@ def _get_combined_df_with_fwd_ret(
 
     # Now add forward returns column to analyze it
     # NOTE We don't need forward returns to run backtests,
-    # so we add them only here,
-    # not inside the TickersData class or anywhere else.
+    # so we add them here instead of inside the TickersData class.
     for ticker in tickers_data.tickers_data_with_features:
         tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
             ohlc_df=tickers_data.tickers_data_with_features[ticker],
