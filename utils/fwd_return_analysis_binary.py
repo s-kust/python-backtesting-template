@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 
 from constants import DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL
+from utils.get_df_with_fwd_ret import add_fwd_ret
+from utils.local_data import TickersData
 
 
 def res_df_final_manipulations(df: pd.DataFrame) -> pd.DataFrame:
@@ -40,3 +42,46 @@ def insert_empty_row_to_res(res: List[dict], row_template: dict) -> List[dict]:
     row_template["count"] = np.nan
     res.append(row_template)
     return res
+
+
+def get_combined_df_with_fwd_ret(
+    tickers_data: TickersData,
+    fwd_ret_days: int,
+) -> pd.DataFrame:
+    """
+    1. For each ticker, call add_fwd_ret function
+    to add the fwd_ret_{fwd_ret_days} column to its dataframe,
+    containing forward returns.
+
+    2. Create a big merged dataframe from the dataframes for all tickers.
+
+    3. For each ticker, remove the fwd_ret_{fwd_ret_days} column from its dataframe
+    to free up memory and speed up the script.
+
+    4. Return the big merged dataframe.
+    """
+
+    # 1
+    for ticker in tickers_data.tickers_data_with_features:
+        if (
+            f"fwd_ret_{fwd_ret_days}"
+            not in tickers_data.tickers_data_with_features[ticker].columns
+        ):
+            tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
+                ohlc_df=tickers_data.tickers_data_with_features[ticker],
+                num_days=fwd_ret_days,
+            )
+
+    # 2
+    combined_df_all = pd.DataFrame()
+    for ticker in tickers_data.tickers_data_with_features:
+        combined_df_all = pd.concat(
+            [combined_df_all, tickers_data.tickers_data_with_features[ticker]]
+        )
+
+    # 3
+    for ticker in tickers_data.tickers_data_with_features:
+        del tickers_data.tickers_data_with_features[ticker][f"fwd_ret_{fwd_ret_days}"]
+
+    # 4
+    return combined_df_all

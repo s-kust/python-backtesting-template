@@ -3,7 +3,6 @@
 import sys
 from typing import List
 
-import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 
@@ -17,10 +16,10 @@ from features.f_rsi import add_feature_high_rsi
 from features.f_v1_basic import add_features_v1_basic
 from utils.bootstrap import get_bootstrapped_mean_ci
 from utils.fwd_return_analysis_binary import (
+    get_combined_df_with_fwd_ret,
     insert_empty_row_to_res,
     res_df_final_manipulations,
 )
-from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
 
 
@@ -41,21 +40,9 @@ def _check_feature_for_fwd_ret_days(
     To make this clear, see the dataframe example in the README.
     """
 
-    for ticker in tickers_data.tickers_data_with_features:
-        if (
-            f"fwd_ret_{fwd_ret_days}"
-            not in tickers_data.tickers_data_with_features[ticker].columns
-        ):
-            tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
-                ohlc_df=tickers_data.tickers_data_with_features[ticker],
-                num_days=fwd_ret_days,
-            )
-
-    combined_df_all = pd.DataFrame()
-    for ticker in tickers_data.tickers_data_with_features:
-        combined_df_all = pd.concat(
-            [combined_df_all, tickers_data.tickers_data_with_features[ticker]]
-        )
+    combined_df_all = get_combined_df_with_fwd_ret(
+        tickers_data=tickers_data, fwd_ret_days=fwd_ret_days
+    )
 
     # Filter returns on days when the feature value is True and False,
     # so that we can compare them.
@@ -67,10 +54,6 @@ def _check_feature_for_fwd_ret_days(
     returns_f_false = (
         combined_df_all[mask_feature_false][f"fwd_ret_{fwd_ret_days}"].dropna().values
     )
-
-    # This saves memory and speeds up the execution.
-    for ticker in tickers_data.tickers_data_with_features:
-        del tickers_data.tickers_data_with_features[ticker][f"fwd_ret_{fwd_ret_days}"]
 
     # Finding the mean and confidence intervals for returns.
     # The get_bootstrapped_mean_ci function also returns the sample size
@@ -92,11 +75,8 @@ def _check_feature_for_fwd_ret_days(
     res_to_return.append(res_f_false)
 
     if insert_empty_row:
-        # create an empty row and append it to the resulting list
-        # to improve the viewing experience of the resulting DataFrame
-        res_f_empty = res_f_true.copy()
         res_to_return = insert_empty_row_to_res(
-            res=res_to_return, row_template=res_f_empty
+            res=res_to_return, row_template=res_f_true.copy()
         )
 
     return res_to_return
