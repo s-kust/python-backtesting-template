@@ -20,6 +20,18 @@ INSERT_EMPTY_ROW = True
 
 
 if __name__ == "__main__":
+
+    # What you'll have to edit frequently before running this script:
+    # 1. List of tickers when initializing the TickersData instance.
+    # 2. Filtering parameters of the combined DataFrame df_filtering_params.
+    # 3. Range of days fwd_ret_days.
+    # 4. RES_FILE_NAME template.
+
+    # If you change the feature you are testing,
+    # you also need to change add_feature_cols_func
+
+    # That seems to be all :)
+
     load_dotenv()
 
     # clear LOG_FILE every time
@@ -79,9 +91,9 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(res)
     df = res_df_final_manipulations(df=df)
-    EXCEL_FILE_NAME_SIMPLE = "res/res_CPER_2_15_RSI_w_bounds_20_50.xlsx"
-    df.to_excel(EXCEL_FILE_NAME_SIMPLE, index=False)
+    RES_FILE_NAME = "res/res_CPER_RSI_w_bounds_15_55_all.xlsx"
+    df.to_excel(RES_FILE_NAME, index=False)
     print(
-        f"Analysis complete! Now you may explore the results file {EXCEL_FILE_NAME_SIMPLE}",
+        f"Analysis complete! Now you may explore the results file {RES_FILE_NAME}",
         file=sys.stderr,
     )
