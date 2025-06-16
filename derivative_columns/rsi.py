@@ -60,7 +60,6 @@ def add_rsi_column(
     """
     # NOTE inspired by https://stackoverflow.com/a/29400434/3139228
 
-    # initial preparations
     _add_rsi_col_initial_validation(df=df, col_name=col_name, ma_type=ma_type)
 
     internal_df = df.copy()
@@ -82,6 +81,7 @@ def add_rsi_column(
     # check results again
     valid_rsi = rsi[RSI_PERIOD - 1 :]
     assert ((0 <= valid_rsi) & (valid_rsi <= 100)).all()
-    # Note: rsi[:RSI_PERIOD - 1] is excluded from above assertion because it is NaN for SMA.
+    # Note: rsi[:RSI_PERIOD - 1] is excluded from above assertion
+    # because it is NaN for simple MA.
     internal_df[f"RSI_{RSI_PERIOD}"] = rsi
     return internal_df

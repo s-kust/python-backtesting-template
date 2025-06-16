@@ -1,10 +1,14 @@
 # pylint: disable=C0121
-from typing import List
+from typing import Callable, List
 
 import numpy as np
 import pandas as pd
 
-from constants import DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL, FEATURE_COL_NAME_BASIC
+from constants import (
+    DEFAULT_BOOTSTRAP_CONFIDENCE_LEVEL,
+    FEATURE_COL_NAME_BASIC,
+    GROUP_COLUMN_NAME,
+)
 from utils.bootstrap import get_bootstrapped_mean_ci
 from utils.get_df_with_fwd_ret import add_fwd_ret
 from utils.local_data import TickersData
@@ -134,16 +138,37 @@ def add_rows_with_feature_true_and_false_to_res(
     return res_to_return
 
 
-def filter_df_by_date(
-    df: pd.DataFrame, date_threshold: str, remaining_part: str
+def get_combined_df_with_fwd_ret_for_groups(
+    tickers_data: TickersData, fwd_red_n_days: int, labelling_func: Callable
 ) -> pd.DataFrame:
     """
-    Filter the portion of a dataframe that is before or after a specified date_threshold.
+    Prepare a combined dataframe with a column containing the group label
+    for all tickers contained in tickers_data.
     """
-    if remaining_part not in ["after", "before"]:
-        raise ValueError(
-            f"_filter_df_by_date: {remaining_part=}, should be after or before"
+
+    # Now add forward returns column to analyze it
+    # NOTE We don't need forward returns to run backtests,
+    # so we add them here instead of inside the TickersData class.
+    for ticker in tickers_data.tickers_data_with_features:
+        tickers_data.tickers_data_with_features[ticker] = add_fwd_ret(
+            ohlc_df=tickers_data.tickers_data_with_features[ticker],
+            num_days=fwd_red_n_days,
         )
-    if remaining_part == "after":
-        return df.loc[df.index >= date_threshold]
-    return df.loc[df.index < date_threshold]
+
+    # Add a column with a group label
+    # and concatenate the DFs of all tickers into one large DF.
+    combined_ohlc_all = pd.DataFrame()
+    for ticker, ohlc_df in tickers_data.tickers_data_with_features.items():
+        ohlc_df[GROUP_COLUMN_NAME] = ohlc_df.apply(labelling_func, axis=1)
+        combined_ohlc_all = pd.concat([combined_ohlc_all, ohlc_df])
+        del ohlc_df[GROUP_COLUMN_NAME]
+        del ohlc_df[f"fwd_ret_{fwd_red_n_days}"]
+
+    combined_ohlc_all = combined_ohlc_all.dropna()
+
+    # just in case...
+    # print(f"{combined_ohlc_all.shape=}")
+    # print(f"{combined_ohlc_all.columns=}")
+    # print(combined_ohlc_all.tail())
+
+    return combined_ohlc_all
