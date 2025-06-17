@@ -58,7 +58,11 @@ if __name__ == "__main__":
     # 2. labelling_func
     # 3. group_order_map
 
-    # That seems to be all :)
+    # It seems to be all :)
+
+    # NOTE If you change the feature, you need to delete
+    # the single_with_features_***.xlsx file from the cache folder,
+    # otherwise the change will not work.
 
     load_dotenv()
 

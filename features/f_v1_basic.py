@@ -88,3 +88,44 @@ def add_features_v2_basic(df: pd.DataFrame) -> pd.DataFrame:
     res = df.copy()
     res[FEATURE_COL_NAME_BASIC] = res["Close"] < res["Close"].shift(1)
     return res
+
+
+def add_feature_closed_lower_twice(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Feature: today's close price is lower than yesterday's close price,
+    also yesterday's close price is lower
+    than the day before yesterday's close price.
+    """
+
+    res = df.copy()
+    res[FEATURE_COL_NAME_BASIC] = (res["Close"] < res["Close"].shift(1)) & (
+        res["Close"].shift(1) < res["Close"].shift(2)
+    )
+    return res
+
+
+def add_feature_closed_lower_3_days_in_a_row(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Feature: closed lower 3 days in a row.
+    """
+    res = df.copy()
+    res[FEATURE_COL_NAME_BASIC] = (
+        (res["Close"] < res["Close"].shift(1))
+        & (res["Close"].shift(1) < res["Close"].shift(2))
+        & (res["Close"].shift(2) < res["Close"].shift(3))
+    )
+    return res
+
+
+def add_feature_closed_lower_4_days_in_a_row(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Feature: closed lower 4 days in a row.
+    """
+    res = df.copy()
+    res[FEATURE_COL_NAME_BASIC] = (
+        (res["Close"] < res["Close"].shift(1))
+        & (res["Close"].shift(1) < res["Close"].shift(2))
+        & (res["Close"].shift(2) < res["Close"].shift(3))
+        & (res["Close"].shift(3) < res["Close"].shift(4))
+    )
+    return res

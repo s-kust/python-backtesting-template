@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
 from features.f_rsi import add_feature_rsi_within_bounds
-from features.f_v1_basic import add_features_v2_basic
+from features.f_v1_basic import (
+    add_feature_closed_lower_4_days_in_a_row,
+    add_features_v2_basic,
+)
 from utils.filter_df import FilterParams, RemainingPart, filter_df_by_date
 from utils.fwd_return_analysis import (
     add_rows_with_feature_true_and_false_to_res,
@@ -28,12 +31,16 @@ INSERT_EMPTY_ROW = True
 # If you change the feature you are testing,
 # you also need to change add_feature_cols_func
 
-# That seems to be all :)
+# It seems to be all :)
 
-tickers_to_process = ["WEAT"]
+# NOTE If you change the feature, you need to delete
+# the single_with_features_***.xlsx file from the cache folder,
+# otherwise the change will not work.
+
+tickers_to_process = ["SPY"]
 FWD_RETURN_DAYS_MIN = 2
 FWD_RETURN_DAYS_MAX = 16
-RES_FILE_NAME = "res/res_WEAT_closed_lower_all.xlsx"
+RES_FILE_NAME = "res/res_SPY_closed_lower_4x_all.xlsx"
 
 # NOTE if do_filtering is False, date_threshold and remaining_part don't matter
 # because there will be no DataFrame filtering
@@ -59,7 +66,7 @@ if __name__ == "__main__":
     # and the add_features_v1_basic function.
     tickers_data_instance = TickersData(
         tickers=tickers_to_process,
-        add_feature_cols_func=add_features_v2_basic,
+        add_feature_cols_func=add_feature_closed_lower_4_days_in_a_row,
     )
 
     res: List[dict] = list()
