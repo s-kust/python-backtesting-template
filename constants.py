@@ -1,4 +1,4 @@
-LOCAL_FOLDER = "/tmp/"
+CACHE_FOLDER = "cache"
 
 TICKER_DATA_RAW_FILENAME_PREFIX = "single_raw_"
 TICKER_DATA_W_FEATURES_FILENAME_PREFIX = "single_with_features_"

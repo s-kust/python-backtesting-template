@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from constants import LOG_FILE, tickers_all
 from features.f_rsi import add_feature_rsi_within_bounds
+from features.f_v1_basic import add_features_v2_basic
 from utils.filter_df import FilterParams, RemainingPart, filter_df_by_date
 from utils.fwd_return_analysis import (
     add_rows_with_feature_true_and_false_to_res,
@@ -18,19 +19,31 @@ from utils.local_data import TickersData
 
 INSERT_EMPTY_ROW = True
 
+# Below are parameters that you'll have to edit frequently before running this script:
+# 1. List of tickers when initializing the TickersData instance.
+# 2. Range of days FWD_RETURN_DAYS_MIN - FWD_RETURN_DAYS_MAX.
+# 3. RES_FILE_NAME template.
+# 4. Filtering parameters of the combined DataFrame df_filtering_params.
+
+# If you change the feature you are testing,
+# you also need to change add_feature_cols_func
+
+# That seems to be all :)
+
+tickers_to_process = ["WEAT"]
+FWD_RETURN_DAYS_MIN = 2
+FWD_RETURN_DAYS_MAX = 16
+RES_FILE_NAME = "res/res_WEAT_closed_lower_all.xlsx"
+
+# NOTE if do_filtering is False, date_threshold and remaining_part don't matter
+# because there will be no DataFrame filtering
+df_filtering_params = FilterParams(
+    do_filtering=False,
+    date_threshold="2023-01-01",
+    remaining_part=RemainingPart.AFTER,
+)
 
 if __name__ == "__main__":
-
-    # What you'll have to edit frequently before running this script:
-    # 1. List of tickers when initializing the TickersData instance.
-    # 2. Filtering parameters of the combined DataFrame df_filtering_params.
-    # 3. Range of days fwd_ret_days.
-    # 4. RES_FILE_NAME template.
-
-    # If you change the feature you are testing,
-    # you also need to change add_feature_cols_func
-
-    # That seems to be all :)
 
     load_dotenv()
 
@@ -45,29 +58,21 @@ if __name__ == "__main__":
     # For more details, see the class TickersData internals
     # and the add_features_v1_basic function.
     tickers_data_instance = TickersData(
-        tickers=["CPER"],
-        add_feature_cols_func=add_feature_rsi_within_bounds,
+        tickers=tickers_to_process,
+        add_feature_cols_func=add_features_v2_basic,
     )
 
     res: List[dict] = list()
-    FWD_RETURN_DAYS_MAX = 16
+
     # Now we run the test for each number of days in the range,
     # form the list of dictionaries
     # and make the resulting DataFrame from it.
-    for fwd_return_days in range(2, FWD_RETURN_DAYS_MAX + 1):
+    for fwd_return_days in range(FWD_RETURN_DAYS_MIN, FWD_RETURN_DAYS_MAX + 1):
         print(
             f"Now check for fwd returns {fwd_return_days} days - up to {FWD_RETURN_DAYS_MAX}"
         )
         combined_df_all = get_combined_df_with_fwd_ret(
             tickers_data=tickers_data_instance, fwd_ret_days=fwd_return_days
-        )
-
-        # NOTE if do_filtering is False, date_threshold and remaining_part don't matter
-        # because there will be no DataFrame filtering
-        df_filtering_params = FilterParams(
-            do_filtering=False,
-            date_threshold="2023-01-01",
-            remaining_part=RemainingPart.AFTER,
         )
 
         # NOTE With this function, you can analyze only data for the latest periods.
@@ -91,7 +96,6 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(res)
     df = res_df_final_manipulations(df=df)
-    RES_FILE_NAME = "res/res_CPER_RSI_w_bounds_15_55_all.xlsx"
     df.to_excel(RES_FILE_NAME, index=False)
     print(
         f"Analysis complete! Now you may explore the results file {RES_FILE_NAME}",

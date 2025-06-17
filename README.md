@@ -162,7 +162,7 @@ The system saves local copies of data in Excel files. It stores “raw” data a
 
 Template for naming a file with raw data: `single_raw_TICKER.xlsx`. Template for naming a file with data and added columns: `single_with_features_TICKER.xlsx`. 
 
-All these files are stored in the `\tmp\` folder by default. You can easily change the destination folder and naming templates in the `constants.py` file.
+All these files are stored in the `\cache\` folder by default. You can easily change the destination folder and naming templates in the `constants.py` file.
 
 ![local cache files](./img/local_cache_files.PNG)
 
@@ -500,7 +500,7 @@ When creating a `TickersData` instance, the system calls a function to add featu
 
 The `recreate_features_every_time` parameter deserves close attention. By default, its value is `False`.
 
-The system stores cached data, including derived columns and features, in Excel files in the `\tmp\` folder.
+The system stores cached data, including derived columns and features, in Excel files in the `\cache\` folder.
 
 ![Local cache of OHLC data with features](./img/cache_data_with_features.PNG)
 
@@ -589,3 +589,7 @@ See also my repo devoted to [Anchored VWAPS](https://github.com/s-kust/anchored_
 
 1. Refactored the scripts for preliminary statistical analysis of trading signals. Now, two dedicated scripts `run_fwd_return_analysis_binary.py` and `run_fwd_return_analysis_groups.py` perform Boolean features analysis and groups analysis.
 2. Added the `filter_df_by_date` function that allows you to compare how your trading signals perform in recent periods versus earlier ones.
+
+*17.06.2025.*
+
+Moved data cache from the `tmp` system folder to the local `cache` folder.

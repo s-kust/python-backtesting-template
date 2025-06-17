@@ -77,3 +77,14 @@ def add_features_v1_basic(
     )
 
     return res
+
+
+def add_features_v2_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    The simplest Boolean feature:
+    today's close price is lower than yesterday's close price
+    """
+
+    res = df.copy()
+    res[FEATURE_COL_NAME_BASIC] = res["Close"] < res["Close"].shift(1)
+    return res

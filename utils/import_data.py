@@ -1,11 +1,12 @@
 import os
+import pathlib
 
 import pandas as pd
 import requests
 
 from constants import (
+    CACHE_FOLDER,
     DATA_FILES_EXTENSION,
-    LOCAL_FOLDER,
     TICKER_DATA_RAW_FILENAME_PREFIX,
     TICKER_DATA_W_FEATURES_FILENAME_PREFIX,
 )
@@ -99,22 +100,28 @@ def import_alpha_vantage_daily(ticker: str) -> pd.DataFrame:
     return data_daily
 
 
-def get_local_ticker_data_file_name(ticker: str, data_type: str = "raw") -> str:
+def get_cache_folder_path() -> pathlib.Path:
+    cache_folder_path_step_1 = pathlib.Path(__file__).parent.parent.resolve()
+    return cache_folder_path_step_1 / CACHE_FOLDER
+
+
+def get_local_ticker_data_file_name(
+    ticker: str, data_type: str = "raw"
+) -> pathlib.Path:
+    cache_folder_path = get_cache_folder_path()
     internal_ticker = ticker.upper()
     if data_type == "raw":
-        return (
-            LOCAL_FOLDER
-            + TICKER_DATA_RAW_FILENAME_PREFIX
-            + internal_ticker
-            + DATA_FILES_EXTENSION
+        filename_raw = (
+            TICKER_DATA_RAW_FILENAME_PREFIX + internal_ticker + DATA_FILES_EXTENSION
         )
+        return cache_folder_path / filename_raw
     if data_type == "with_features":
-        return (
-            LOCAL_FOLDER
-            + TICKER_DATA_W_FEATURES_FILENAME_PREFIX
+        filename_with_features = (
+            TICKER_DATA_W_FEATURES_FILENAME_PREFIX
             + internal_ticker
             + DATA_FILES_EXTENSION
         )
+        return cache_folder_path / filename_with_features
     raise ValueError(
         f"get_local_ticker_data_file_name: wrong {data_type=}, should be raw or with_features"
     )
