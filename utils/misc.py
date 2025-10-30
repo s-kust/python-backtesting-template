@@ -57,18 +57,20 @@ def get_forecast_bb(df: pd.DataFrame) -> pd.Series:
     return df["forecast_bb"]
 
 
-def check_df_format(df: pd.DataFrame, expected_interval: str) -> dict:
+def check_df_format(df: pd.DataFrame) -> dict:
     """
-    Checks if a Pandas DataFrame has a DatetimeIndex and a specific bar interval.
+    Checks if a Pandas DataFrame has a DatetimeIndex
+    and determines the bar interval in minutes.
 
     Args:
         df: The input Pandas DataFrame.
-        expected_interval: The expected time interval (e.g., '15min', '30min').
 
     Returns:
-        A dictionary containing the results of the checks.
+        A dictionary containing the results of the checks including the bar interval.
+        The returned bar interval value 999 means the function failed to determine it
     """
     results = {}
+    results["inferred_interval_minutes"] = 999
 
     # 1. Check if the index is a DatetimeIndex
     # is_datetime64_any_dtype checks for any datetime-like dtype
@@ -78,17 +80,8 @@ def check_df_format(df: pd.DataFrame, expected_interval: str) -> dict:
     # 2. Check the bar interval (frequency)
     if is_dt_index and len(df) >= 2:
         # Calculate the difference between the first two timestamps
-        inferred_diff = df.index[1] - df.index[0]
-
-        # Convert the expected interval string (e.g., '15min') to a timedelta object
-        expected_diff = pd.Timedelta(expected_interval)
-
-        # Compare the calculated difference with the expected difference
-        is_correct_interval = inferred_diff == expected_diff
-        results["is_correct_interval"] = is_correct_interval
-        results["inferred_interval"] = inferred_diff
-    else:
-        results["is_correct_interval"] = False
-        results["inferred_interval"] = "N/A (DF too small or Index not Datetime)"
+        inferred_diff_minutes = (df.index[1] - df.index[0]).total_seconds() / 60.0
+        inferred_diff_minutes = int(inferred_diff_minutes)
+        results["inferred_interval_minutes"] = inferred_diff_minutes
 
     return results
