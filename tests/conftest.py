@@ -171,3 +171,14 @@ def mock_add_atr_col_to_df(mocker: pytest_mock.plugin.MockerFixture) -> MagicMoc
 
     # Use mocker from pytest-mock to patch the function within the min_max module
     return mocker.patch("derivative_columns.min_max.add_atr_col_to_df")
+
+
+@pytest.fixture
+def df_5_min_with_ib() -> pd.DataFrame:
+    """
+    Pandas DataFrame OHLC with 5 min bars interval
+    and Initial Balance High (ib_high)
+    and Initial Balance Low (ib_low) columns
+    """
+    file = Path(__file__).parent / "fixtures_data/df_5m_with_IB.csv"
+    return pd.read_csv(file, parse_dates=[0], index_col=0)
