@@ -55,3 +55,40 @@ def add_feature_group_col_to_df(
 
 def get_forecast_bb(df: pd.DataFrame) -> pd.Series:
     return df["forecast_bb"]
+
+
+def check_df_format(df: pd.DataFrame, expected_interval: str) -> dict:
+    """
+    Checks if a Pandas DataFrame has a DatetimeIndex and a specific bar interval.
+
+    Args:
+        df: The input Pandas DataFrame.
+        expected_interval: The expected time interval (e.g., '15min', '30min').
+
+    Returns:
+        A dictionary containing the results of the checks.
+    """
+    results = {}
+
+    # 1. Check if the index is a DatetimeIndex
+    # is_datetime64_any_dtype checks for any datetime-like dtype
+    is_dt_index = pd.api.types.is_datetime64_any_dtype(df.index)
+    results["is_datetime_index"] = is_dt_index
+
+    # 2. Check the bar interval (frequency)
+    if is_dt_index and len(df) >= 2:
+        # Calculate the difference between the first two timestamps
+        inferred_diff = df.index[1] - df.index[0]
+
+        # Convert the expected interval string (e.g., '15min') to a timedelta object
+        expected_diff = pd.Timedelta(expected_interval)
+
+        # Compare the calculated difference with the expected difference
+        is_correct_interval = inferred_diff == expected_diff
+        results["is_correct_interval"] = is_correct_interval
+        results["inferred_interval"] = inferred_diff
+    else:
+        results["is_correct_interval"] = False
+        results["inferred_interval"] = "N/A (DF too small or Index not Datetime)"
+
+    return results

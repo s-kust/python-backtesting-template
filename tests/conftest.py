@@ -32,13 +32,13 @@ def spy_df_daily_with_min_max_cols(
 @pytest.fixture
 def spy_df_5_min() -> pd.DataFrame:
     file = Path(__file__).parent / "fixtures_data/5m_SPY_for_testing.csv"
-    return pd.read_csv(file, index_col=0)
+    return pd.read_csv(file, parse_dates=[0], index_col=0)
 
 
 @pytest.fixture
 def spy_df_15_min() -> pd.DataFrame:
     file = Path(__file__).parent / "fixtures_data/15m_SPY_for_testing.csv"
-    return pd.read_csv(file, index_col=0)
+    return pd.read_csv(file, parse_dates=[0], index_col=0)
 
 
 @pytest.fixture
