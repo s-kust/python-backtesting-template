@@ -4,11 +4,15 @@ import pytest
 from derivative_columns.initial_balance import check_initial_balance_breach
 
 
-def test_check_initial_balance_breach_ok(df_5_min_with_ib: pd.DataFrame) -> None:
+def test_check_initial_balance_breach_ok(
+    df_5_min_with_ib: pd.DataFrame, df_5_min_with_ib_breakdown_breakout: pd.DataFrame
+) -> None:
     res = check_initial_balance_breach(df=df_5_min_with_ib)
     assert "ib_high_bt" in res.columns
     assert "ib_low_bd" in res.columns
-    res.to_csv("./df_5m_with_IB_bd_bt.csv", encoding="utf-8", header=True, index=True)
+    assert "ib_high" in res.columns
+    assert "ib_low" in res.columns
+    pd.testing.assert_frame_equal(res, df_5_min_with_ib_breakdown_breakout)
 
 
 def test_check_initial_balance_breach_no_datetime_index_in_df(

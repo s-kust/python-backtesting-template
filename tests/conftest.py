@@ -182,3 +182,16 @@ def df_5_min_with_ib() -> pd.DataFrame:
     """
     file = Path(__file__).parent / "fixtures_data/df_5m_with_IB.csv"
     return pd.read_csv(file, parse_dates=[0], index_col=0)
+
+
+@pytest.fixture
+def df_5_min_with_ib_breakdown_breakout() -> pd.DataFrame:
+    """
+    Pandas DataFrame OHLC with 5 min bars interval
+    and Initial Balance High (ib_high)
+    and Initial Balance Low (ib_low) columns
+    and Initial Balance Low Breakdown (ib_low_bd)
+    and Initial Balance High Breakout (ib_high_bt) columns
+    """
+    file = Path(__file__).parent / "fixtures_data/df_5m_with_IB_bd_bt.csv"
+    return pd.read_csv(file, parse_dates=[0], index_col=0)
