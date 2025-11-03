@@ -129,3 +129,113 @@ def check_initial_balance_breach(
 
     # 4. Return the modified dataframe
     return df
+
+
+def calculate_ib_breakout_and_breakdown_metrics(
+    df: pd.DataFrame,
+) -> tuple[list[dict], list[dict]]:
+    """
+    Calculates metrics for Initial Balance Low Breakdown (ib_low_bd) and
+    Initial Balance High Breakout (ib_high_bt) events.
+
+    The ultimate goal is to determine whether it is worth
+    taking a short trade after Initial Balance Low Breakdown has happened,
+    as well as a long trade after Initial Balance High Breakout has happened.
+
+    :param df: A Pandas DataFrame with a DatetimeIndex and columns
+               'Open', 'High', 'Low', 'ib_low_bd', and 'ib_high_bt'.
+    :return: A tuple containing two lists of dictionaries.
+    """
+
+    # 1. Checks that the dataframe has ib_low_bd and ib_high_bt columns.
+    required_cols = ["Open", "High", "Low", "ib_low_bd", "ib_high_bt"]
+    if not all(col in df.columns for col in required_cols):
+        raise ValueError(
+            f"DataFrame must contain all required columns: {required_cols}"
+        )
+
+    # 2. Checks that the dataframe has a DateTime index.
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise TypeError("DataFrame must have a DatetimeIndex.")
+
+    # 3. Creates empty lists (now containing dictionaries)
+    ib_low_bd_vals = []
+    ib_high_bt_vals = []
+
+    # 4. Iterates the dataframe over days.
+    for _, day_df in df.groupby(df.index.date):
+
+        has_bd = day_df["ib_low_bd"].any()
+        has_bt = day_df["ib_high_bt"].any()
+
+        # Skip if no event
+        if not (has_bd or has_bt):
+            continue
+
+        # --- Procedure for a day that has ib_low_bd True value ---
+        if has_bd:
+            breakdown_times = day_df[day_df["ib_low_bd"]].index
+
+            for bd_time in breakdown_times:
+                current_idx_loc = df.index.get_loc(bd_time)
+
+                # 1. Find the value of the Open column in the next bar
+                next_idx_loc = current_idx_loc + 1
+                if next_idx_loc >= len(df):
+                    continue
+
+                next_open = df.iloc[next_idx_loc]["Open"]
+
+                # 2. Find the minimum value of the Low column after event
+                bars_after_bd = day_df.loc[day_df.index > bd_time]
+
+                if bars_after_bd.empty:
+                    continue
+
+                lowest_low_after_breakdown = bars_after_bd["Low"].min()
+
+                # 3. Calculate the value
+                if next_open != 0:
+                    bd_metric = (next_open - lowest_low_after_breakdown) / next_open
+
+                    # 4. Append dictionary: {'Date': today's day date, 'Val': value}
+                    ib_low_bd_vals.append(
+                        {
+                            "Date": bd_time.date(),
+                            "Val": bd_metric,
+                            "next_open": next_open,
+                            "lowest_low_after": lowest_low_after_breakdown,
+                        }
+                    )
+
+        # --- Procedure for a day that has ib_high_bt True value ---
+        if has_bt:
+            breakout_times = day_df[day_df["ib_high_bt"]].index
+
+            for bt_time in breakout_times:
+                current_idx_loc = df.index.get_loc(bt_time)
+
+                # 1. Find the value of the Open column in the next bar
+                next_idx_loc = current_idx_loc + 1
+                if next_idx_loc >= len(df):
+                    continue
+
+                next_open = df.iloc[next_idx_loc]["Open"]
+
+                # 2. Find the maximum value of the High column after event
+                bars_after_bt = day_df.loc[day_df.index > bt_time]
+
+                if bars_after_bt.empty:
+                    continue
+
+                highest_high_after_breakout = bars_after_bt["High"].max()
+
+                # 3. Calculate the value
+                if next_open != 0:
+                    bt_metric = (highest_high_after_breakout - next_open) / next_open
+
+                    # 4. Append dictionary: {'Date': today's day date, 'Val': value}
+                    ib_high_bt_vals.append({"Date": bt_time.date(), "Val": bt_metric})
+
+    # 5. Returns lists of dictionaries.
+    return ib_low_bd_vals, ib_high_bt_vals

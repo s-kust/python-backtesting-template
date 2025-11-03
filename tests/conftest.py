@@ -195,3 +195,21 @@ def df_5_min_with_ib_breakdown_breakout() -> pd.DataFrame:
     """
     file = Path(__file__).parent / "fixtures_data/df_5m_with_IB_bd_bt.csv"
     return pd.read_csv(file, parse_dates=[0], index_col=0)
+
+
+@pytest.fixture
+def df_ib_high_bt_metrics_res() -> pd.DataFrame:
+    """
+    Return OHLC DataFrame with Initial Balance High Breakout metrics
+    """
+    file = Path(__file__).parent / "fixtures_data/df_ib_high_bt_metrics_res.csv"
+    return pd.read_csv(file, index_col=0, parse_dates=[1])
+
+
+@pytest.fixture
+def df_ib_low_bd_metrics_res() -> pd.DataFrame:
+    """
+    Return OHLC DataFrame with Initial Balance Low Breakdown metrics
+    """
+    file = Path(__file__).parent / "fixtures_data/df_ib_low_bd_metrics_res.csv"
+    return pd.read_csv(file, index_col=0, parse_dates=[1])
